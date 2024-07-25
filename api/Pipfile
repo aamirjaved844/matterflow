@@ -1,0 +1,29 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+coverage = "~=5.1"
+coverage-badge = "~=1.0"
+v = {editable = true,version = "*"}
+
+[packages]
+autopep8 = "*"
+django = "*"
+pandas = "*"
+python-dotenv = "~=1.0.1"
+networkx = "*"
+matterflow = {path = "./matterflow",editable = true}
+djangorestframework = "*"
+drf-yasg = "*"
+click = "*"
+altair = "*"
+cli = {path = "./CLI",editable = true}
+matterflowcli = {path = "./CLI",editable = true}
+aiomqtt = "*"
+aiohttp = "*"
+websocket-client = "*"
+
+[requires]
+python_version = "3.12"

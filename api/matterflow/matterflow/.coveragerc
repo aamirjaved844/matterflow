@@ -1,0 +1,5 @@
+[run]
+omit=
+	*/.local/share/virtualenvs/*
+    ./tests/*
+    ./nodes/custom_nodes/*

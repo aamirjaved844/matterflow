@@ -1,0 +1,221 @@
+import click
+import json
+from matterflow import Workflow, WorkflowException
+from matterflow import NodeException
+from matterflow.nodes import ReadCsvNode, WriteCsvNode, ReadJsonNode, WriteJsonNode, WsConnectionNode
+import asyncio
+import time
+import io
+
+from matterflow.connection import *
+
+class Config(object):
+    def __init__(self):
+        self.verbose = False
+
+
+pass_config = click.make_pass_decorator(Config, ensure=True)
+
+
+
+async def useWsConnectionForConsuming(filenames, verbose, websocket_connection_settings, websocket_input_settings, websocket_output_settings):
+    websocket_connection = ConnectionFactory.create_connection("Websocket", websocket_connection_settings, websocket_input_settings, websocket_output_settings)
+
+    print("started useWsConnectionForConsuming")
+    await websocket_connection.connect()
+
+async def useWsConnectionForReading(filenames, verbose, websocket_connection_settings, websocket_input_settings, websocket_output_settings):
+    websocket_connection = ConnectionFactory.create_connection("Websocket", websocket_connection_settings, websocket_input_settings, websocket_output_settings)
+    print("started useWsConnectionForReading")
+
+    while True:
+        message = await websocket_connection.read_input()
+        input = json.dumps(message)
+        in_stream = io.BytesIO(input.encode('utf-8'))
+        sys.stdin = io.TextIOWrapper(in_stream, encoding='utf-8')        
+        await execute_async(filenames, verbose)
+        await asyncio.sleep(0.1)
+
+async def run_all_ws_flows(filenames, verbose):
+    # Example usage "WS"
+    '''
+    connection_settings = {
+        "Client ID": "client123",
+        "Connection Timeout": 60,
+        "Keep Alive": 120,
+        "host": "127.0.0.1",
+        "port": 5580,
+        "Clean Session": True
+    }
+    '''
+    input_settings = {
+        "Topic": "#",
+        "Include Topic": True,
+        "Payload Type": "JSON"
+    }
+    output_settings = {
+        "Topic": "sensors/response",
+        "QoS": 1,
+        "Named Root": "sensor_data",
+        "Retain": False,
+        "Breakup Arrays": False,
+        "Template": "{temperature}",
+        "AWS IoT Core": False
+    }    
+
+
+    """ Start concurrent tasks and join  together """
+    print("Begin to start tasks...")
+
+    async with asyncio.TaskGroup() as tasks:
+
+        # Execute each workflow in the args
+        for workflow_file in filenames:
+
+            if workflow_file is None:
+                click.echo('Please specify a workflow to run', err=True)
+                return
+
+            try:
+                workflow = open_workflow(workflow_file)
+                execution_order = workflow.execution_order()
+                node_to_execute = workflow.get_node(execution_order[0])
+                connection_settings = json.loads(node_to_execute.option_values["input"])
+
+                print("<connection_settings>")
+                print(connection_settings)
+                print("</connection_settings>")
+                ##create the tasks
+                tasks.create_task(useWsConnectionForConsuming(filenames, verbose, connection_settings, input_settings, output_settings))
+                tasks.create_task(useWsConnectionForReading(filenames, verbose, connection_settings, input_settings, output_settings))
+
+            except OSError as e:
+                click.echo(f"Issues loading workflow file: {e}", err=True)
+            except WorkflowException as e:
+                click.echo(f"Issues during workflow execution\n{e}", err=True)
+
+    results = []
+
+
+    print(f"All flows done")
+
+    return results
+
+@click.group()
+def event():
+    pass
+
+
+@event.command()
+@click.argument('filenames', type=click.Path(exists=True), nargs=-1)
+@click.option('--verbose', is_flag=True, help='Enables verbose mode.')
+def execute(filenames, verbose):
+    asyncio.run(run_all_ws_flows(filenames, verbose))
+
+
+async def execute_async(filenames, verbose):
+    """Execute Workflow file(s)."""
+    # Check whether to log to terminal, or redirect output
+    log = click.get_text_stream('stdout').isatty()
+
+    # Execute each workflow in the args
+    for workflow_file in filenames:
+
+        if workflow_file is None:
+            click.echo('Please specify a workflow to run', err=True)
+            return
+
+        if log:
+            click.echo('Loading workflow file from %s' % workflow_file)
+
+        try:
+            workflow = open_workflow(workflow_file)
+            execute_workflow(workflow, log, verbose)
+        except OSError as e:
+            click.echo(f"Issues loading workflow file: {e}", err=True)
+        except WorkflowException as e:
+            click.echo(f"Issues during workflow execution\n{e}", err=True)
+
+def execute_workflow(workflow, log, verbose):
+    """Execute a workflow file, node-by-node.
+
+    Retrieves the execution order from the Workflow and iterates through nodes.
+    If any I/O nodes are present AND stdin/stdout redirection is provided in the
+    command-line, overwrite the stored options and then replace before saving.
+
+    Args:
+        workflow - Workflow object loaded from file
+        log - True, for outputting to terminal; False for stdout redirection
+        verbose - True, for outputting debug information; False otherwise
+    """
+    execution_order = workflow.execution_order()
+
+    # Execute each node in the order returned by the Workflow
+    for node in execution_order:
+        try:
+            node_to_execute = workflow.get_node(node)
+            original_file_option = pre_execute(workflow, node_to_execute, log)
+
+            if verbose:
+                print('Executing node of type ' + str(type(node_to_execute)))
+
+            # perform execution
+            executed_node = workflow.execute(node)
+
+            # If file was replaced with stdin/stdout, restore original option
+            if original_file_option is not None:
+                executed_node.option_values["file"] = original_file_option
+
+            # Update Node in Workflow with changes (saved data file)
+            workflow.update_or_add_node(executed_node)
+        except NodeException as e:
+            click.echo(f"Issues during node execution\n{e}", err=True)
+
+    if verbose:
+        click.echo('Completed workflow execution!')
+
+
+def pre_execute(workflow, node_to_execute, log):
+    """Pre-execution steps, to overwrite file options with stdin/stdout.
+
+    If stdin is not a tty, and the Node is ReadCsv, replace file with buffer.
+    If stdout is not a tty, and the Node is WriteCsv, replace file with buffer.
+
+    Args:
+        workflow - Workflow object loaded from file
+        node_to_execute - The Node to execute
+        log - True, for outputting to terminal; False for stdout redirection
+    """
+    stdin = click.get_text_stream('stdin')
+
+
+    if type(node_to_execute) is ReadCsvNode and not stdin.isatty():
+        new_file_location = stdin
+    elif type(node_to_execute) is WriteCsvNode and not log:
+        new_file_location = click.get_text_stream('stdout')
+    elif type(node_to_execute) is ReadJsonNode and not stdin.isatty():
+        new_file_location = stdin
+    elif type(node_to_execute) is WriteJsonNode and not log:
+        #this is important as we dont want to use stdin for files that are writing out to the file system
+        return None
+    elif type(node_to_execute) is WsConnectionNode and not stdin.isatty():
+        new_file_location = stdin
+    else:
+        # No file redirection needed
+        return None
+
+    # save original file info
+    original_file_option = node_to_execute.option_values["file"]
+
+    # replace with value from stdin and save
+    node_to_execute.option_values["file"] = new_file_location
+    workflow.update_or_add_node(node_to_execute)
+
+    return original_file_option
+
+
+def open_workflow(workflow_file):
+    with open(workflow_file) as f:
+        json_content = json.load(f)
+
+    return Workflow.from_json(json_content['matterflow'])
