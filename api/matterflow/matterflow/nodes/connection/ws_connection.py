@@ -6,6 +6,7 @@ from matterflow.connection import *
 import click
 import os 
 import socket
+import jmespath
 
 def isWebsocketOpen(ip,port):
    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,11 +39,6 @@ class WsConnectionNode(ConnectionNode):
             default=test_file_path,
             docstring="Json File"
         ),
-        "input": TextParameter(
-            "Connection Settings",
-            default='{"Client ID": "client123", "Connection Timeout": 60, "Keep Alive": 120, "host": "127.0.0.1", "port": 5580 }',
-            docstring="Connection Settings Input"
-        ),        
     }
 
     def execute(self, predecessor_data, flow_vars):
@@ -56,7 +52,7 @@ class WsConnectionNode(ConnectionNode):
         else:
             return '{"message":"executing in cli"}'
         '''
-
+        
         try:
             if flow_vars["file"].get_value() == "/tmp/":
                 return '{"message":"try uploading a test json file"}'
@@ -83,7 +79,8 @@ class WsConnectionNode(ConnectionNode):
         """
         super().validate()
 
-        value = self.options["input"].get_value()
+        '''
+        value = self.options["connection"].get_value()
         if not isinstance(value, str):
             raise Exception("Sorry, input must be a string") 
         
@@ -94,4 +91,4 @@ class WsConnectionNode(ConnectionNode):
 
         if not isWebsocketOpen(json_settings['host'],json_settings['port']):
             raise Exception(f"Websocket must be available on {json_settings['host']} and port {json_settings['port']}")
-
+        '''

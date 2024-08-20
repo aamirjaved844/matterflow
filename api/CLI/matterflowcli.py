@@ -38,7 +38,6 @@ async def useWsConnectionForReading(filenames, verbose, websocket_connection_set
 
 async def run_all_ws_flows(filenames, verbose):
     # Example usage "WS"
-    '''
     connection_settings = {
         "Client ID": "client123",
         "Connection Timeout": 60,
@@ -47,7 +46,6 @@ async def run_all_ws_flows(filenames, verbose):
         "port": 5580,
         "Clean Session": True
     }
-    '''
     input_settings = {
         "Topic": "#",
         "Include Topic": True,
@@ -80,11 +78,9 @@ async def run_all_ws_flows(filenames, verbose):
                 workflow = open_workflow(workflow_file)
                 execution_order = workflow.execution_order()
                 node_to_execute = workflow.get_node(execution_order[0])
-                connection_settings = json.loads(node_to_execute.option_values["input"])
+#                connection_settings = json.loads(node_to_execute.option_values["connection"])
+#                input_settings = json.loads(node_to_execute.option_values["input"])
 
-                print("<connection_settings>")
-                print(connection_settings)
-                print("</connection_settings>")
                 ##create the tasks
                 tasks.create_task(useWsConnectionForConsuming(filenames, verbose, connection_settings, input_settings, output_settings))
                 tasks.create_task(useWsConnectionForReading(filenames, verbose, connection_settings, input_settings, output_settings))
@@ -194,7 +190,8 @@ def pre_execute(workflow, node_to_execute, log):
     elif type(node_to_execute) is WriteCsvNode and not log:
         new_file_location = click.get_text_stream('stdout')
     elif type(node_to_execute) is ReadJsonNode and not stdin.isatty():
-        new_file_location = stdin
+        #new_file_location = stdin
+        return None
     elif type(node_to_execute) is WriteJsonNode and not log:
         #this is important as we dont want to use stdin for files that are writing out to the file system
         return None

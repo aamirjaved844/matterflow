@@ -21,23 +21,29 @@ class WriteJsonNode(IONode):
             "Filename",
             docstring="CSV file to write"
         ),
+        "write_mode": SelectParameter(
+            "Write Mode",
+            options=["overwrite", "append"],
+            default="append",
+            docstring="Overwrite or append to file"
+        ),
     }
 
     def execute(self, predecessor_data, flow_vars):
+
         try:
-
             # Convert JSON data to string
-
             json_string = json.dumps(predecessor_data[0])
 
-            print("<**********************************************************************************************************************>")
-            print(flow_vars['file'].get_value())
-            print("</**********************************************************************************************************************>")
+            write_mode = 'a'
+            if flow_vars["write_mode"].get_value() == 'overwrite':
+                write_mode = 'w'
 
             # Write to CSV and save
-            with open(flow_vars["file"].get_value(), "a") as f:
+            with open(flow_vars["file"].get_value(), write_mode) as f:
                 f.write(json_string)
                 f.write('\n')
+                f.close()
     
             return json_string
 

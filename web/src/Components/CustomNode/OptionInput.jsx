@@ -4,6 +4,7 @@ import SimpleInput from './SimpleInput';
 import FileUploadInput from './FileUploadInput';
 import BooleanInput from './BooleanInput';
 import SelectInput from './SelectInput';
+import InstanceSelectInput from './InstanceSelectInput';
 
 import FlowVariableOverride from './FlowVariableOverride';
 
@@ -37,6 +38,8 @@ const OptionInput = (props) => {
         inputComp = <BooleanInput {...props} disabled={isFlow} />
     } else if (props.type === "select") {
         inputComp = <SelectInput {...props} />
+    } else if (props.type === "instanceselect") {
+        inputComp = <InstanceSelectInput {...props} />
     } else {
         return (<></>)
     }

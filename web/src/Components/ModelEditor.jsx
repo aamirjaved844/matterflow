@@ -7,7 +7,7 @@ import * as API from '../API';
 const ModelEditor = () => {
     const navigate = useNavigate();
 
-    const fieldDatatypeOptions = ["String", "Number", "Boolean", "Object"];
+    const fieldDatatypeOptions = ["String", "Number", "Boolean", "Object", "Timestamp"];
 
     const [inputFields, setInputFields] = useState([
             { fieldName: "", fieldDatatype: "Object", fieldNameError: "" },

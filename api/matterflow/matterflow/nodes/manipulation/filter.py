@@ -2,7 +2,8 @@ from matterflow.node import ManipulationNode, NodeException
 from matterflow.parameters import *
 
 import pandas as pd
-
+import json
+import jmespath
 
 class FilterNode(ManipulationNode):
     name = "Filter"
@@ -10,28 +11,63 @@ class FilterNode(ManipulationNode):
     num_out = 1
 
     OPTIONS = {
-        'items': StringParameter(
-            'Items',
-            docstring='Keep labels from axis which are in items'
+        "filter": StringParameter(
+            "Filter",
+            default='*',
+            docstring="Jmespath query to filter"
         ),
-        'like': StringParameter(
-            'Like',
-            docstring='Keep labels from axis for which like in label == True.'
+        "include": BooleanParameter(
+            "Include",
+            default=True,
+            docstring="Include entries found by filter"
         ),
-        'regex': StringParameter(
-            'Regex',
-            docstring='Keep labels from axis for which re.search(regex, label) == True.'
+        "data": BooleanParameter(
+            "Output Filtered Data",
+            default=False,
+            docstring="Output filtered data instead of original data entry"
         ),
-        'axis': StringParameter(
-            'Axis',
-            docstring='The axis to filter on.'
-        )
     }
 
     def execute(self, predecessor_data, flow_vars):
+        # Convert JSON data to string
         try:
-            input_df = pd.DataFrame.from_dict(predecessor_data[0])
-            output_df = pd.DataFrame.filter(input_df, **self.options)
-            return output_df.to_json()
+            json_string = json.dumps(predecessor_data[0])
+
+            message = json.loads(json.dumps(predecessor_data[0]))
+            filter_settings = flow_vars["filter"].get_value()
+            include_settings = flow_vars["include"].get_value()
+            data_settings = flow_vars["data"].get_value()
+
+            #filter the input if required        
+            filter = '*' #match everything but overwrite below if we have a filter
+            if len(filter_settings)>0:
+                filter = filter_settings
+
+            input = '{"filtered":"true"}'
+            transformedandfilterdata = jmespath.search(filter, message)
+            if transformedandfilterdata is not None:
+                #we have found a match
+                if include_settings: #check if we are to include
+                    if data_settings: #check if data settings is true then we return the filtered
+                        print("sending back transformed data")
+                        if type(transformedandfilterdata) is list and len(transformedandfilterdata)>0:
+                            transformedandfilterdata[0]['filtered'] = "true"
+                        input = json.dumps(transformedandfilterdata)
+                    else:
+                        print("sending back original")
+                        input = json.dumps(message)  
+            else:
+                if not include_settings:
+                    input = json.dumps(message)
+                else:
+                    print("ignoring message as we message not given matching filter")
+
+            print("*"*80)
+            #
+            # 
+            # print(input)
+            print("*"*80)
+            return input
+
         except Exception as e:
             raise NodeException('filter', str(e))

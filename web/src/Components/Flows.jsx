@@ -99,7 +99,10 @@ const Flows = () => {
                     </nav>                
                 </TableCell>            
           </TableRow>          
-          ))}        
+          ))}
+          <TableRow>
+            <Link to={`/flows/edit`} className="rw-button rw-button-small">Create new flow?</Link>
+          </TableRow>        
       </TableBody>      
   </Table>    
 

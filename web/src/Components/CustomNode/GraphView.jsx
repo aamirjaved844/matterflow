@@ -175,7 +175,7 @@ export default class GraphView extends React.Component {
           }
 
       }
-
+      console.log(this.state.data)
       return (
           <Modal
               show={this.props.show}

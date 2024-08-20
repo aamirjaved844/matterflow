@@ -24,13 +24,20 @@ class ReadJsonNode(IONode):
     }
 
     def execute(self, predecessor_data, flow_vars):
+        print("*"*80)
+        print("file")
+        print(flow_vars["file"].get_value())
         try:
-            df = pd.read_json(
-                flow_vars["file"].get_value()
-                , typ='series'
-            )
-            return df.to_json()
+            # Read from file and check json validity
+            with open(flow_vars["file"].get_value(), 'r') as f:
+                json_string = f.read()
+                f.close()
 
+            #check that its valid json by converting to a json object and then back again to string
+            #this will throw an exception if invalid json
+            json_string = json.dumps(json.loads(json_string))
+            return json_string            
+        
         except Exception as e:
             print("got error in read")
             raise NodeException('read json', str(e))

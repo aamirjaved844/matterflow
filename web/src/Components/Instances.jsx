@@ -16,7 +16,7 @@ const useFetch = () => {
           const response = await API.getInstances();
           console.log(response.data)
           console.log(typeof(response.data))
-          if(typeof bar === 'string') {
+          if(typeof response.data === 'string') {
             //if the returned data is a string lets try to parse to json
             //before setting the data
             setData(JSON.parse(response.data));
@@ -50,7 +50,7 @@ const Instances = () => {
     const handleDelete = async (instance_id) => {
       const response = await API.deleteInstance(instance_id);
       window.location.reload();
-  }
+    }
   
     if (loading) {
       return <div>Loading...</div>;
@@ -68,6 +68,10 @@ const Instances = () => {
         return (
             <div>There are no instance entries. <Link to={`/instances/edit`} className="rw-button rw-button-small">Create one now?</Link></div>
         );
+    }
+
+    const handleSelect = async (instance) => {
+      alert(instance);
     }
 
     return (
@@ -102,6 +106,9 @@ const Instances = () => {
               </td>
             </tr>
           ))}
+          <tr>
+            <Link to={`/instances/edit`} className="rw-button rw-button-small">Create new?</Link>
+          </tr>
         </tbody>
       </table>
     </div>

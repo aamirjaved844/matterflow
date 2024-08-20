@@ -142,6 +142,8 @@ const Workspace = (props) => {
             API.updateFlow(flow_id, inputData)
                 .then(() => {
                     console.log("Flow saved successfully");
+                    //save the flow file to server so we can start the supervisor process
+                    API.saveToServer(model.serialize());
                     navigate("/flows");
                 });
         }
@@ -155,11 +157,11 @@ const Workspace = (props) => {
             API.addFlow(inputData)
                 .then(() => {
                     console.log("Flow created successfully");
+                    //save the flow file to server so we can start the supervisor process
+                    API.saveToServer(model.serialize());
                     navigate("/flows");
                 });
         }
-        //save the flow file to server so we can start the supervisor process
-        API.saveToServer(model.serialize());
 
     };
 

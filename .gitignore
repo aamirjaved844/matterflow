@@ -196,3 +196,6 @@ cython_debug/
 
 #Dont commit any files marked as ready for deletion TBD
 *_TBD
+
+#Dont commit any supervisor flow process files
+api/supervisor_confs/

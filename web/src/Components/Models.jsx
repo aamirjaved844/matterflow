@@ -102,6 +102,9 @@ const Models = () => {
               </td>
             </tr>
           ))}
+          <tr>
+          <Link to={`/models/edit`} className="rw-button rw-button-small">Create new?</Link>
+          </tr>
         </tbody>
       </table>
     </div>

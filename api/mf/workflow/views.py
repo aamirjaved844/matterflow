@@ -201,11 +201,12 @@ def save_workflow_to_server(request):
         f.write(combined_json)
         f.close()
 
-        #2. Add the file to the supervisord        
-        supervisord_filename = f"/home/ivob/Projects/matterflow/back-end/supervisor_confs/{request.matterflow.filename}.conf"
+        #2. Add the file to the supervisord in supervisor_confs folder       
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        supervisord_filename = f"{dir_path}/../../supervisor_confs/{request.matterflow.filename}.conf"
         f = open(supervisord_filename, "w")
         f.write(f'''[program:{request.matterflow.name}]
-command=/bin/bash -c "source /home/ivob/Projects/matterflow/venv/bin/activate && matterflow execute {workflow_filename} --verbose"
+command=/bin/bash -c "source {dir_path}/../../venv/bin/activate && matterflow execute {workflow_filename} --verbose"
 ''')
         f.close()
 

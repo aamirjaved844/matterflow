@@ -60,6 +60,12 @@ def manipulation_node(node_key, node_info):
         return PivotNode(node_info)
     elif node_key == 'FilterNode':
         return FilterNode(node_info)
+    elif node_key == 'UnflattenNode':
+        return UnflattenNode(node_info)
+    elif node_key == 'MappingNode':
+        return MappingNode(node_info)
+    elif node_key == 'CombineNode':
+        return CombineNode(node_info)
     else:
         return None
 
