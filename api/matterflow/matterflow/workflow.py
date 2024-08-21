@@ -306,8 +306,6 @@ class Workflow:
             print("^^"*40)
             print("len of preceding_data")
             print(len(preceding_data))
-            print(type(preceding_data))
-            print(preceding_data)
             print(node_to_execute)
             print("^^"*40)
             numberOfInputs = len(preceding_data)

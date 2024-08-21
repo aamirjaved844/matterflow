@@ -1,4 +1,103 @@
 import json
+import pandas as pd
+
+jsonString = '{"message_id":"107481","result":[{"node_id":1,"date_commissioned":"2024-08-12T19:15:34.402405","last_interview":"2024-08-12T19:15:34.402410","interview_version":6,"available":true,"is_bridge":false,"attributes":{"0":{"30":{"0":[],"65528":[],"65529":[],"65531":[0,65528,65529,65531,65532,65533],"65532":0,"65533":1},"31":{"0":[{"1":5,"2":2,"3":[112233],"4":null,"254":1}],"1":[],"2":4,"3":3,"4":4,"65528":[],"65529":[],"65531":[0,1,2,3,4,65528,65529,65531,65532,65533],"65532":0,"65533":1},"40":{"0":17,"1":"TEST_VENDOR","2":65521,"3":"TEST_PRODUCT","4":32769,"5":"","6":"XX","7":0,"8":"TEST_VERSION","9":1,"10":"1.0","11":"20200101","12":"","13":"","14":"","15":"TEST_SN","16":false,"18":"892345B5B9FA5E40","19":{"0":3,"1":65535},"20":{"0":2,"1":5},"21":16973824,"22":5,"65528":[],"65529":[],"65531":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,65528,65529,65531,65532,65533],"65532":0,"65533":3}}},"attribute_subscriptions":[]}]}'
+
+jsonObject = json.loads(jsonString)
+
+print(jsonObject['result'][0]['attributes'])
+df = pd.json_normalize(jsonObject['result'][0]['attributes'])
+
+print(df.to_json())
+
+
+exit(1)
+import json
+from collections import defaultdict
+
+def transform_json_data(input_json):
+    def nested_dict():
+        return defaultdict(nested_dict)
+
+    # Convert the defaultdict back to a regular dictionary
+    def convert_to_regular_dict(d):
+        if isinstance(d, defaultdict):
+            d = {k: convert_to_regular_dict(v) for k, v in d.items()}
+        return d
+
+    def unflatten_attributes(data):
+        if isinstance(data, dict):
+            transformed_data = nested_dict()
+            keys_to_remove = []
+            for key, value in data.items():
+                parts = key.split('/')
+                if len(parts) == 3 and all(part.isdigit() for part in parts):
+                    transformed_data[parts[0]][parts[1]][parts[2]] = value
+                    keys_to_remove.append(key)
+                else:
+                    transformed_data[key] = value
+            
+            # Remove the original flat keys after adding the nested structure
+            for key in keys_to_remove:
+                del data[key]
+
+            # Convert defaultdict back to regular dictionary
+            return convert_to_regular_dict(transformed_data)
+        elif isinstance(data, list):
+            if len(data) == 3 and isinstance(data[1], str):
+                parts = data[1].split('/')
+                if len(parts) == 3 and all(part.isdigit() for part in parts):
+                    transformed_data = nested_dict()
+                    transformed_data[parts[0]][parts[1]][parts[2]] = data[2]
+                    return [data[0], convert_to_regular_dict(transformed_data)]
+            return [unflatten_attributes(item) if isinstance(item, (dict, list)) else item for item in data]
+        else:
+            return data
+
+    def process_json(data):
+        if isinstance(data, list):
+            return [process_json(item) for item in data]
+        elif isinstance(data, dict):
+            if 'data' in data:
+                data['data'] = unflatten_attributes(data['data'])
+            if 'result' in data:
+                for result in data['result']:
+                    if 'attributes' in result:
+                        result['attributes'] = unflatten_attributes(result['attributes'])
+            return data
+        else:
+            return data
+
+    try:
+        # Load the input JSON string into a Python object
+        data = json.loads(input_json)
+
+        # Process the JSON object
+        processed_data = process_json(data)
+
+        # Convert the Python object back to a JSON string
+        return json.dumps(processed_data)
+
+    except Exception as e:
+        # Return the original JSON string in case of an exception
+        return input_json
+
+# Test Data
+test1 = '[{"event":"attribute_updated","data":[1,"1/6/0",true]},{"message_id":"107481","result":[{"node_id":1,"date_commissioned":"2024-08-12T19:15:34.402405","last_interview":"2024-08-12T19:15:34.402410","interview_version":6,"available":true,"is_bridge":false,"attributes":{"0/30/0":[],"0/30/65532":0,"0/30/65533":1}}]}]'
+test2 = '{"event":"attribute_updated","data":[1,"1/6/0",true]}'
+test3 = '{"message_id":"107481","result":[{"node_id":1,"date_commissioned":"2024-08-12T19:15:34.402405","last_interview":"2024-08-12T19:15:34.402410","interview_version":6,"available":true,"is_bridge":false,"attributes":{"0/30/0":[],"0/30/65532":0,"0/30/65533":1}}]}'
+
+test4 = '{"event": "node_event", "data": {"node_id": 1, "endpoint_id": 0, "cluster_id": 52, "event_id": 0, "event_number": 22, "priority": 1, "timestamp": 1724140787624, "timestamp_type": 1, "data": {"id": 110349, "name":"110349", "faultRecording": "VHVlIEF1ZyAyMCAwODo1OTo0NyAyMDI0"}}}'
+
+print(transform_json_data(test1))
+print(transform_json_data(test2))
+print(transform_json_data(test3))
+print(transform_json_data(test4))
+
+
+
+exit(1)
+import json
 
 
 jsonString = '{"event": "attribute_updated", "data": [1, "1/6/0", true]}'

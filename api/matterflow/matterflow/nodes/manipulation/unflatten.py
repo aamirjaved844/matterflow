@@ -10,7 +10,6 @@ from collections import defaultdict
 #######################
 
 def transform_json_data(input_json):
-    
     def nested_dict():
         return defaultdict(nested_dict)
 
@@ -20,65 +19,62 @@ def transform_json_data(input_json):
             d = {k: convert_to_regular_dict(v) for k, v in d.items()}
         return d
 
+    def unflatten_attributes(data):
+        if isinstance(data, dict):
+            transformed_data = nested_dict()
+            keys_to_remove = []
+            for key, value in data.items():
+                parts = key.split('/')
+                if len(parts) == 3 and all(part.isdigit() for part in parts):
+                    transformed_data[parts[0]][parts[1]][parts[2]] = value
+                    keys_to_remove.append(key)
+                else:
+                    transformed_data[key] = value
+            
+            # Remove the original flat keys after adding the nested structure
+            for key in keys_to_remove:
+                del data[key]
+
+            # Convert defaultdict back to regular dictionary
+            return convert_to_regular_dict(transformed_data)
+        elif isinstance(data, list):
+            if len(data) == 3 and isinstance(data[1], str):
+                parts = data[1].split('/')
+                if len(parts) == 3 and all(part.isdigit() for part in parts):
+                    transformed_data = nested_dict()
+                    transformed_data[parts[0]][parts[1]][parts[2]] = data[2]
+                    return [data[0], convert_to_regular_dict(transformed_data)]
+            return [unflatten_attributes(item) if isinstance(item, (dict, list)) else item for item in data]
+        else:
+            return data
+
+    def process_json(data):
+        if isinstance(data, list):
+            return [process_json(item) for item in data]
+        elif isinstance(data, dict):
+            if 'data' in data:
+                data['data'] = unflatten_attributes(data['data'])
+            if 'result' in data:
+                for result in data['result']:
+                    if 'attributes' in result:
+                        result['attributes'] = unflatten_attributes(result['attributes'])
+            return data
+        else:
+            return data
+
     try:
-        # Load the input JSON string into a Python object (list or dict)
+        # Load the input JSON string into a Python object
         data = json.loads(input_json)
 
+        # Process the JSON object
+        processed_data = process_json(data)
 
-        # Check if the input is an attribute update
-        if 'event' in data and data['event']=='attribute_updated':
-
-
-            # Check if the key matches the pattern 'number/number/number'
-            parts = data['data'][1].split('/')
-
-
-            if len(parts) == 3 and all(part.isdigit() for part in parts):
-                # Create a default dictionary for the transformed key
-                transformed_attributes = nested_dict()
-                # Assign the value at index 2 to the unflattened key structure
-                transformed_attributes[parts[0]][parts[1]][parts[2]] = data['data'][2]
-                # Convert the defaultdict to a regular dictionary
-                transformed_attributes = convert_to_regular_dict(transformed_attributes)
-                # Replace the original string key with the transformed dictionary
-                data['data'][1] = transformed_attributes
-                # Remove the value that was previously at index 2
-                data['data'].pop(2)
-
-
-        # Otherwise, handle the original structure of the input JSON
-        else:
-            # Assuming the input is a dictionary
-            if 'result' in data:
-                for i in range(len(data['result'])):
-                    # Create a default dictionary that allows for dynamic creation of nested dictionaries
-                    transformed_attributes = nested_dict()
-
-                    # Iterate over the attributes in the input data
-                    for key, value in data['result'][i]['attributes'].items():
-                        # Check if the key matches the pattern 'number/number/number'
-                        parts = key.split('/')
-                        if len(parts) == 3 and all(part.isdigit() for part in parts):
-                            # Decompose the key into three parts and insert the value accordingly
-                            transformed_attributes[parts[0]][parts[1]][parts[2]] = value
-                        else:
-                            # Handle other attributes if necessary
-                            transformed_attributes[key] = value
-
-                    transformed_attributes = convert_to_regular_dict(transformed_attributes)
-
-                    # Update the original data with the transformed attributes
-                    data['result'][i]['attributes'] = transformed_attributes
-
-        # Convert the Python dictionary back to a JSON string
-        return json.dumps(data)
+        # Convert the Python object back to a JSON string
+        return json.dumps(processed_data)
 
     except Exception as e:
         # Return the original JSON string in case of an exception
         return input_json
-
-
-
 #######################
 
 
