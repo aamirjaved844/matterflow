@@ -253,13 +253,13 @@ const Workspace = (props) => {
             </Row>
             <Row className="Workspace">
                 <Col xs={3}>
+                    <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
                     <GlobalFlowMenu
                         menuItems={nodes["Flow Control"] || []}
                         nodes={globals}
                         onUpdate={getGlobalVars}
                         diagramModel={model}
                     />
-                    <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
                 </Col>
                 <Col xs={9} style={{ paddingLeft: 0 }}>
                     <div

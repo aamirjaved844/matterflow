@@ -1,3 +1,110 @@
+import csv
+import json
+import os
+
+def write_json_to_csv(json_obj, csv_file, separator=',', add_index=False):
+    # Check if the CSV file exists
+    file_exists = os.path.isfile(csv_file)
+    
+    # Extract keys from the JSON object
+    keys = json_obj.keys()
+    
+    # Write the JSON data to CSV
+    with open(csv_file, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=['index'] + list(keys), delimiter=separator)
+        
+        if not file_exists:
+            writer.writeheader()
+        else:
+            with open(csv_file, 'r') as check_file:
+                reader = csv.DictReader(check_file, delimiter=separator)
+                existing_keys = set(reader.fieldnames)
+                if set(keys) != existing_keys:
+                    raise ValueError("New JSON object keys do not match the columns in the existing CSV file.")
+                    
+        if add_index:
+            with open(csv_file, 'r') as check_file:
+                reader = csv.DictReader(check_file, delimiter=separator)
+                index = sum(1 for _ in reader) + 1
+                
+            writer.writerow({'index': index, **json_obj})
+        else:
+            writer.writerow(json_obj)
+
+# Example usage
+json_obj1 = {"ts": 1724237405.6873968, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": False, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj2 = {"ts": 1724237412.5495899, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+
+write_json_to_csv(json_obj1, '/tmp/hello.csv', separator=',', add_index=True)
+write_json_to_csv(json_obj2, '/tmp/hello.csv', separator=',', add_index=True)
+
+exit(1)
+
+import csv
+import json
+import os
+
+def write_json_to_csv(json_obj, csv_file):
+    # Check if the CSV file exists
+    file_exists = os.path.isfile(csv_file)
+    
+    # Extract keys from the first JSON object
+    keys = json_obj.keys()
+    
+    # Write the JSON data to CSV
+    with open(csv_file, 'a', newline='') as file:
+        writer = csv.DictWriter(file, fieldnames=keys)
+        
+        if not file_exists:
+            writer.writeheader()
+        else:
+            # Check if keys match
+            current_keys = set(keys)
+            with open(csv_file, 'r') as check_file:
+                reader = csv.DictReader(check_file)
+                existing_keys = set(reader.fieldnames)
+                if current_keys != existing_keys:
+                    raise ValueError("New JSON object does not have the same keys and columns as the existing CSV file.")
+        
+        writer.writerow(json_obj)
+
+# Example usage
+json_obj1 = {"ts": 1724237405.6873968, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": False, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj2 = {"ts": 1724237412.5495899, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+
+json_obj3 = {"ts": 1724237412.7553027, "nodeId": 1, "endpointId": "1", "clusterId": "8", "attributeId": "0", "value": 1, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj4 = {"ts": 1724237412.9633584, "nodeId": 1, "endpointId": "1", "clusterId": "8", "attributeId": "0", "value": 254, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj5 = {"ts": 1724237523.548028, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": False, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj6 = {"ts": 1724237676.3593817, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj7 = {"ts": 1724243836.3710217, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj8 = {"ts": 1724243993.189941, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj9 = {"ts": 1724243998.8310523, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj10 = {"ts": 1724244005.3310614, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj11 = {"ts": 1724244124.4375043, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": True, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj12 = {"ts": 1724244124.6438465, "nodeId": 1, "endpointId": "1", "clusterId": "8", "attributeId": "0", "value": 1, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj13 = {"ts": 1724244124.850494, "nodeId": 1, "endpointId": "1", "clusterId": "8", "attributeId": "0", "value": 254, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj14 = {"ts": 1724244139.389968, "nodeId": 1, "endpointId": "1", "clusterId": "6", "attributeId": "0", "value": False, "vendorName": "TEST_VENDOR", "productName": "TEST_PRODUCT"}
+json_obj15 = {"message_id":"107481","result":[{"node_id":1,"date_commissioned":"2024-08-12T19:15:34.402405","last_interview":"2024-08-12T19:15:34.402410","interview_version":6,"available":True,"is_bridge":False,"attributes":{"0/30/0":[],"0/30/65532":0,"0/30/65533":1,"0/30/65528":[],"0/30/65529":[],"0/30/65531":[0,65528,65529,65531,65532,65533],"0/31/0":[{"1":5,"2":2,"3":[112233],"4":None,"254":1}],"0/31/1":[],"0/31/2":4,"0/31/3":3,"0/31/4":4,"0/31/65532":0,"0/31/65533":1,"0/31/65528":[],"0/31/65529":[],"0/31/65531":[0,1,2,3,4,65528,65529,65531,65532,65533],"0/40/0":17,"0/40/1":"TEST_VENDOR","0/40/2":65521,"0/40/3":"TEST_PRODUCT","0/40/4":32769,"0/40/5":"","0/40/6":"XX","0/40/7":0,"0/40/8":"TEST_VERSION","0/40/9":1,"0/40/10":"1.0","0/40/11":"20200101","0/40/12":"","0/40/13":"","0/40/14":"","0/40/15":"TEST_SN","0/40/16":False,"0/40/18":"892345B5B9FA5E40","0/40/19":{"0":3,"1":65535},"0/40/20":{"0":2,"1":5},"0/40/21":16973824,"0/40/22":5,"0/40/65532":0,"0/40/65533":3,"0/40/65528":[],"0/40/65529":[],"0/40/65531":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18,19,20,21,22,65528,65529,65531,65532,65533]},"attribute_subscriptions":[]}]}
+
+write_json_to_csv(json_obj1, '/tmp/output_new.csv')
+write_json_to_csv(json_obj15, '/tmp/output_new.csv')
+'''
+write_json_to_csv(json_obj2, '/tmp/output_new.csv')
+write_json_to_csv(json_obj3, '/tmp/output_new.csv')
+write_json_to_csv(json_obj4, '/tmp/output_new.csv')
+write_json_to_csv(json_obj5, '/tmp/output_new.csv')
+write_json_to_csv(json_obj6, '/tmp/output_new.csv')
+write_json_to_csv(json_obj7, '/tmp/output_new.csv')
+write_json_to_csv(json_obj8, '/tmp/output_new.csv')
+write_json_to_csv(json_obj9, '/tmp/output_new.csv')
+write_json_to_csv(json_obj10, '/tmp/output_new.csv')
+write_json_to_csv(json_obj11, '/tmp/output_new.csv')
+write_json_to_csv(json_obj12, '/tmp/output_new.csv')
+write_json_to_csv(json_obj13, '/tmp/output_new.csv')
+write_json_to_csv(json_obj14, '/tmp/output_new.csv')
+'''
+exit(1)
+
 import json
 import pandas as pd
 

@@ -9,7 +9,7 @@ export default function NodeMenu(props) {
     return (
         <div className="NodeMenu">
             <h3>Node Menu</h3>
-            <div>Drag-and-drop nodes to build a workflow.</div>
+            <div>Drag-and-drop nodes to build a data workflow.</div>
             <hr />
             {_.map(props.nodes, (items, section) =>
                 <div key={`node-menu-${section}`}>
