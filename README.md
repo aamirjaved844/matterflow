@@ -1,4 +1,4 @@
-This is the READ ME file. You can change this and push the changes back to the upstream repo
+This is the README file. You can change this and push the changes back to the upstream repo
 
 #Installation
 
