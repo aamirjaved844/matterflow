@@ -25,6 +25,7 @@ aiomqtt = "*"
 aiohttp = "*"
 websocket-client = "*"
 jmespath = "*"
+dotenv = "*"
 
 [requires]
 python_version = "3.12"

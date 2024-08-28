@@ -30,7 +30,8 @@ ALLOWED_HOSTS = ['back-end:8000',
                  'localhost',
                  '127.0.0.1',
                  '0.0.0.0',
-                 '[::1]']
+                 '[::1]',
+                 'homeassistant.local']
 
 
 # Application definition
