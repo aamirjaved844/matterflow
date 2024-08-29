@@ -24,6 +24,7 @@ matterflowcli = {path = "./CLI",editable = true}
 aiomqtt = "*"
 aiohttp = "*"
 websocket-client = "*"
+websockets = "*"
 jmespath = "*"
 
 [requires]
