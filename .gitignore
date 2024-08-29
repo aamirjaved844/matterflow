@@ -34,7 +34,7 @@ __pycache__/
 *$py.class
 
 # migrations files
-migrations/
+#migrations/
 
 # C extensions
 *.so
