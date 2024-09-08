@@ -1,7 +1,7 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import { useState, useEffect } from 'react';
-import {  Badge,  Card,  Table,  TableBody,  TableCell,  TableHead,  TableHeaderCell,  TableRow,} from '@tremor/react';
+import {  Badge,  Button, Card,  Table,  TableBody,  TableCell,  TableHead,  TableHeaderCell,  TableRow,} from '@tremor/react';
 import { timeTag, truncate } from '../lib/formatters'
 import * as API from '../API';
 import DialogConfirmation from './DialogConfirmation';
@@ -71,40 +71,37 @@ const Flows = () => {
 
     return (
 
-  <Table className="w-full">        
+  <Table className="w-full">
       <TableHead>          
           <TableRow>            
               <TableHeaderCell>Id</TableHeaderCell>            
               <TableHeaderCell>Name</TableHeaderCell>            
-              <TableHeaderCell>Description</TableHeaderCell>            
-              <TableHeaderCell>JSON</TableHeaderCell>          
+              <TableHeaderCell>Description</TableHeaderCell>
+              <TableHeaderCell>Actions</TableHeaderCell>
           </TableRow>        
       </TableHead>        
       <TableBody>          
           {data.map((item) => (            
-          <TableRow key={item.id}>              
-              <TableCell>{item.name}</TableCell>              
-              <TableCell>{item.description}</TableCell>              
-              <TableCell>{truncate(item.json_data)}</TableCell>              
+          <TableRow key={item.id}>
+              <TableCell>{item.id}</TableCell>
+              <TableCell>{item.name}</TableCell>
+              <TableCell>{item.description}</TableCell>
               <TableCell>
-              <nav className="rw-table-actions">
-                      <Link to="" className="rw-button rw-button-small">
-                            Show
-                      </Link>
-                      <Link to={`/flows/edit/${item.id}`} className="rw-button rw-button-small">
-                        Edit Flow
-                      </Link>
-                      <DialogConfirmation id={item} mainMessage={'Activate Flow?'} subMessage={'This will start the flow process!'} confirmationHandler={handleActivate} />
-                      <DialogConfirmation id={item.id} mainMessage={'Delete?'} subMessage={'This action cannot be undone!'} confirmationHandler={handleDelete} />
-                    </nav>                
-                </TableCell>            
+                <div class="flex flex-row">
+                  <div class="px-1"><Link to={`/flows/edit/${item.id}`} className="rw-button rw-button-small"><Button className="mx-auto block" >Edit</Button></Link></div>
+                  <div class="px-1"><DialogConfirmation id={item} mainMessage={'Activate'} subMessage={'This will start the flow process!'} confirmationHandler={handleActivate} /></div>
+                  <div class="px-1"><DialogConfirmation id={item.id} mainMessage={'Delete'} subMessage={'This action cannot be undone!'} confirmationHandler={handleDelete} /></div>
+                </div>
+              </TableCell>
           </TableRow>          
           ))}
           <TableRow>
-            <Link to={`/flows/edit`} className="rw-button rw-button-small">Create new flow?</Link>
+            <TableCell>
+              <Link to={`/flows/edit`} className="rw-button rw-button-small"><Button className="mx-auto block" >Create Flow</Button></Link>
+            </TableCell>
           </TableRow>        
       </TableBody>      
-  </Table>    
+  </Table>
 
 
       )

@@ -9,8 +9,12 @@ function FlowsPage() {
       <div className='flex flex-col flex-1 relative'>
         <Navbar />
         <div className='grid md:grid-cols-3 grid-cols-1 w-full'>
-        <Flows/>
+        <div className='col-span-3'>
+          <Flows />
         </div>
+        <div className='w-full'>
+        </div>
+      </div>
       </div>
     </main>
   )

@@ -1,53 +1,5 @@
 
 /**
- * Sends request to server via fetch API and handles error cases
- * @param {string} endpoint - server endpoint
- * @param {Object} options - options parameter for `fetch` call
- * @returns {Promise<Object>} - server response or error
-function fetchWrapper(endpoint, options = {}) {
-    // Configurable mapping of endpoints to target hosts
-    const endpointMappings = {
-      "/node": "http://localhost:8000/node",
-      "/connection": "http://localhost:8000/connection",
-      "/flow": "http://localhost:8000/flow",
-      "/process": "http://localhost:8000/process",
-      "/model": "http://localhost:8000/model",
-      "/instance": "http://localhost:8000/instance",
-    };
-  
-    // Configurable list of bypass subdirectories
-    const bypassSubdirectories = {
-      "/node": "/node_modules",
-      "/connection": "/connections",
-      "/flow": "/flows",
-      "/process": "/processes",
-      "/model": "/models",
-      "/instance": "/instances",
-    };
-  
-    return new Promise((resolve, reject) => {
-      // Check if endpoint needs to be redirected
-      for (const key in endpointMappings) {
-        if (endpoint.includes(key) && !endpoint.includes(bypassSubdirectories[key])) {
-          fetch(endpointMappings[key], options)
-            .then(async resp => {
-              const data = await resp.json();
-              if (resp.ok) {
-                return resolve(data);
-              } else {
-                return reject(data);
-              }
-            })
-          .catch(err => {
-            return reject(err);
-          });
-        }
-      }
-    });
-  }
- */
-
-/**
  * Sends request to server via fetch API and handles error cases
  * @param {string} endpoint - server endpoint
  * @param {Object} options - options parameter for `fetch` call
