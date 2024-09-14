@@ -9,8 +9,11 @@ cd api
 ```
 
 1. Install and activate python3.12 `virtual environment` 
+
+```
 /usr/bin/python3.12 -m venv ./venv
 source venv/bin/activate
+```
 
 2. Install `pipenv`
 
@@ -40,6 +43,7 @@ echo "SECRET_KEY='TEMPORARY SECRET KEY'" > mf/.environment
 5. Start dev server from app root
 ```
 cd mf
+pipenv run python3 manage.py migrate
 pipenv run python3 manage.py runserver
 ```
     

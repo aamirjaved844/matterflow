@@ -36,6 +36,7 @@ def new_flow(request):
         flow.save() #save to db        
         return JsonResponse({
             'Message': 'Flow Created',
+            'Id': flow.id,
             'Request Body': json.dumps(json_data)
         })
     except (json.JSONDecodeError, KeyError) as e:

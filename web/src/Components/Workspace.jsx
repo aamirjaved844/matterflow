@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button, Offcanvas } from 'react-bootstrap';
 import createEngine, { DiagramModel } from '@projectstorm/react-diagrams';
 import { CanvasWidget } from '@projectstorm/react-canvas-core';
 import MFLinkFactory from './MFLink/MFLinkFactory';
@@ -8,6 +8,8 @@ import CustomNodeFactory from './CustomNode/CustomNodeFactory';
 import MFPortFactory from './MFPort/MFPortFactory';
 import * as API from '../API';
 import NodeMenu from './NodeMenu';
+import FlowMenu from './FlowMenu';
+import ModelMenu from './ModelMenu';
 import '../styles/Workspace.css';
 import GlobalFlowMenu from "./GlobalFlowMenu";
 import DialogConfirmation from './DialogConfirmation';
@@ -18,12 +20,20 @@ import { useNavigate } from "react-router-dom";
  */
 const Workspace = (props) => {
     const [nodes, setNodes] = useState([]);
+    const [flows, setFlows] = useState([]);
+    const [models, setModels] = useState([]);
+    const [show, setShow] = useState(false);
     const [globals, setGlobals] = useState([]);
+    const [isDirty, setIsDirty] = useState(false);
+
     const engine = useRef(createEngine()).current;
     const model = useRef(new DiagramModel()).current;
     const flow_id = props.params?.flow_id;
+    //we can access the flow_id by using props.params.flow_id
+
     const diagramData = useRef(null);
-    const navigate = useNavigate();
+
+    //const navigate = useNavigate();
 
     engine.getNodeFactories().registerFactory(new CustomNodeFactory());
     engine.getLinkFactories().registerFactory(new MFLinkFactory());
@@ -32,13 +42,14 @@ const Workspace = (props) => {
     engine.setMaxNumberPointsPerLink(0);
 
     useEffect(() => {
-        if (flow_id) {
+        if (flow_id && flow_id != 'new') {
             API.getFlow(flow_id).then((value) => {
                 try {
                     diagramData.current = JSON.parse(value.data.json_data);
                 } catch {
                     console.log("Invalid or missing json data");
                     diagramData.current = {};
+                    window.location = `/`
                 }
 
                 if (Object.keys(diagramData.current).length === 0) {
@@ -54,7 +65,8 @@ const Workspace = (props) => {
                     getGlobalVars();
                     getAvailableNodes();
                 }
-            });
+            })
+            .catch(err => window.location = `/`);
         } else {
             API.initWorkflow(model)
                 .then(() => {
@@ -80,6 +92,24 @@ const Workspace = (props) => {
     const getGlobalVars = () => {
         API.getGlobalVars()
             .then(vars => setGlobals(vars))
+            .catch(err => console.log(err));
+    };
+
+    /**
+     * Retrieve available flows from server to display in the menu
+     */
+    const getAvailableFlows = () => {
+        API.getFlows()
+            .then(flows => setFlows(flows))
+            .catch(err => console.log(err));
+    };
+
+    /**
+     * Retrieve available models from server to display in the menu
+     */
+    const getAvailableModels = () => {
+        API.getModels()
+            .then(models => setModels(models))
             .catch(err => console.log(err));
     };
 
@@ -121,6 +151,7 @@ const Workspace = (props) => {
             .then(() => {
                 model.addNode(node);
                 engine.repaintCanvas();
+                setIsDirty(true);
             })
             .catch(err => console.log(err));
     };
@@ -130,39 +161,43 @@ const Workspace = (props) => {
      * @param {string} flow_id - The flow ID
      */
     const handleSave = (flow_id) => {
-        const json_data = JSON.stringify(model.serialize());
 
-        if (flow_id){
-            const inputData = {
-                id: flow_id,
-                name: JSON.parse(json_data)['id'],
-                description: "Matter Flow",
-                json_data
-            };
-            API.updateFlow(flow_id, inputData)
-                .then(() => {
-                    console.log("Flow saved successfully");
-                    //save the flow file to server so we can start the supervisor process
-                    API.saveToServer(model.serialize());
-                    navigate("/flows");
-                });
-        }
-        else {
-            const inputData = {
-                name: JSON.parse(json_data)['id'],
-                description: "Brett",
-                json_data
-            };
-            // Logic to send the form data to the server
-            API.addFlow(inputData)
-                .then(() => {
-                    console.log("Flow created successfully");
-                    //save the flow file to server so we can start the supervisor process
-                    API.saveToServer(model.serialize());
-                    navigate("/flows");
-                });
-        }
+//        if (window.confirm("You will lose any unsaved work.")) {
+        
+            const json_data = JSON.stringify(model.serialize());
 
+            if (flow_id && flow_id != 'new'){
+                const inputData = {
+                    id: flow_id,
+                    name: JSON.parse(json_data)['id'],
+                    description: 'flow-' + Math.random().toString(36).substring(7),
+                    json_data
+                };
+                API.updateFlow(flow_id, inputData)
+                    .then(() => {
+                        console.log("Flow saved successfully");
+                        //save the flow file to server so we can start the supervisor process
+                        API.saveToServer(model.serialize());
+                        setIsDirty(false);
+                        //window.location = `/`
+                    });
+            }
+            else {
+                const inputData = {
+                    name: JSON.parse(json_data)['id'],
+                    description: 'flow-' + Math.random().toString(36).substring(7),
+                    json_data
+                };
+                // Logic to send the form data to the server
+                API.addFlow(inputData)
+                    .then((data) => {
+                        console.log("Flow created successfully");
+                        //save the flow file to server so we can start the supervisor process
+                        API.saveToServer(model.serialize());
+                        window.location = `/${data['Id']}`
+                    });
+            }
+//        }
     };
 
     /**
@@ -187,72 +222,61 @@ const Workspace = (props) => {
         }
     };
 
-    /**
-     * Manually create a node in the workspace
-     */
-    const manuallyCreateNodeWorkspace = async () => {
-        console.log("In manuallyCreateNodeWorkspace");
-        const data = {
-            nodeInfo: {
-                name: "WS Connection",
-                node_key: "WsConnectionNode",
-                node_type: "connection",
-                num_in: 0,
-                num_out: 1,
-                color: "blue",
-                filename: "ws_connection",
-                doc: "WsConnectionNode\n\n    Reads a Websocket into a workflow.\n\n    Raises:\n         NodeException: any error reading web socket, converting\n            to workflow.\n    ",
-                option_types: {
-                    file: {
-                        type: "file",
-                        label: "Test Json",
-                        value: "",
-                        docstring: "Json File"
-                    },
-                    input: {
-                        type: "text",
-                        label: "Connection Settings",
-                        value: "{\"Client ID\": \"client123\", \"Connection Timeout\": 60, \"Keep Alive\": 120, \"host\": \"127.0.0.1\", \"port\": 5580 }",
-                        docstring: "Connection Settings Input"
-                    }
-                },
-                download_result: false
-            },
-            config: {
-                file: "",
-                input: "{\"Client ID\": \"client123\", \"Connection Timeout\": 60, \"Keep Alive\": 120, \"host\": \"127.0.0.1\", \"port\": 5580 }"
-            }
-        };
-
-        const node = new CustomNodeModel(data.nodeInfo, data.config);
-        API.addNode(node)
-            .then(() => {
-                model.addNode(node);
-                API.save(model.serialize());
-            })
-            .catch(err => console.log(err));
+    const handleAddFlow = async () => {
+       window.location = `/new`
     };
+
+    /**
+     * Handlers for offcanvas dialog
+     */
+    const handleClose = () => setShow(false);
+    const handleShow = () => setShow(true);
 
     return (
         <>
             <Row className="mb-3">
                 <Col md={12}>
-                    <DialogConfirmation id={flow_id} mainMessage="Save and Exit?" subMessage="Your changes will be saved!" confirmationHandler={() => handleSave(flow_id)} />
+                    
 
                     <Button size="sm" onClick={() => { alert(JSON.stringify(model.serialize())); }}>
                         ShowData
                     </Button>{' '}
                     <Button size="sm" onClick={() => { API.save(model.serialize()); }}>
-                        Save
+                        Export
                     </Button>{' '}
                     <FileUpload handleData={load} />{' '}
                     <Button size="sm" onClick={clear}>Clear</Button>{' '}
                     <Button size="sm" onClick={execute}>Execute</Button>{' '}
-                    <Button size="sm" onClick={manuallyCreateNodeWorkspace}>ManuallyCreateNodeWorkspace</Button>
+                    <Button size="sm" onClick={handleShow}>Console</Button>
+                    <Button size="sm" onClick={() => handleSave(flow_id)}>Save</Button>
                 </Col>
             </Row>
             <Row className="Workspace">
                 <Col xs={3}>
+                    <FlowMenu flow_id={flow_id} isDirty={isDirty} flows={flows} diagramModel={model} onNewFlow={handleAddFlow} />
+                    <ModelMenu models={models} onUpload={getAvailableModels} />
+                    
+                </Col>
+                <Col xs={7} style={{ paddingLeft: 0 }}>
+                    <div
+                        style={{ position: 'relative', flexGrow: 1 }}
+                        onDrop={handleNodeCreation}
+                        onDragOver={(event) => event.preventDefault()}
+                    >
+                        <CanvasWidget className="diagram-canvas" engine={engine} />
+                        <Offcanvas placement='bottom' show={show} onHide={handleClose} scroll={false} backdrop={true}>
+                            <Offcanvas.Header closeButton>
+                            <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+                            </Offcanvas.Header>
+                            <Offcanvas.Body>
+                            Some text as placeholder. In real life you can have the elements you
+                            have chosen. Like, text, images, lists, etc.
+                            </Offcanvas.Body>
+                        </Offcanvas>
+
+                    </div>
+                </Col>
+                <Col xs={2}>
                     <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
                     <GlobalFlowMenu
                         menuItems={nodes["Flow Control"] || []}
@@ -260,15 +284,6 @@ const Workspace = (props) => {
                         onUpdate={getGlobalVars}
                         diagramModel={model}
                     />
-                </Col>
-                <Col xs={9} style={{ paddingLeft: 0 }}>
-                    <div
-                        style={{ position: 'relative', flexGrow: 1 }}
-                        onDrop={handleNodeCreation}
-                        onDragOver={(event) => event.preventDefault()}
-                    >
-                        <CanvasWidget className="diagram-canvas" engine={engine} />
-                    </div>
                 </Col>
             </Row>
         </>

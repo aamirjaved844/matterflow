@@ -1,11 +1,9 @@
 import React from 'react'
 import { Divider, TextInput, Select,  SelectItem } from '@tremor/react';
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from "react-router-dom";
 import * as API from '../API';
 
-const ModelEditor = () => {
-    const navigate = useNavigate();
+const ModelEditor = (params) => {
 
     const fieldDatatypeOptions = ["String", "Number", "Boolean", "Object", "Timestamp"];
 
@@ -13,7 +11,7 @@ const ModelEditor = () => {
             { fieldName: "", fieldDatatype: "Object", fieldNameError: "" },
         ]);
     
-    const {model_id} = useParams();
+    const model_id = params?.model_id;
     let hasModelId = false;
 
     if (model_id != undefined) {
@@ -22,11 +20,12 @@ const ModelEditor = () => {
             API.getModel(model_id).then(res=>{
                 console.log(res.data.json_data);
                 var json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
-                if (json_data.length === 0) {
+                if (json_data.length === 0 || Object.keys(json_data).length === 0) {
                     json_data = [{ fieldName: "", fieldDatatype: "Object", fieldNameError: "" }]
                 }
                 setInputFields(json_data);
             })
+            .catch(err => console.log(err));
         }
         useEffect(()=>{
             init()
@@ -84,8 +83,6 @@ const ModelEditor = () => {
         }
 
         const inputs = {
-            "name": "model name",
-            "description": "model descriptipn", 
             "json_data" : inputFields
            } 
 
@@ -99,7 +96,7 @@ const ModelEditor = () => {
             const response = await API.addModel(inputs);
             console.log(response);
         }
-        navigate("/models");
+//        navigate("/models");
         
     };
 

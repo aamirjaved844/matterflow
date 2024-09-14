@@ -1,7 +1,6 @@
 import React from 'react';
 import { Divider, TextInput, Select,  SelectItem } from '@tremor/react';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
 import JsonTree from './JsonTree';
 import ModelSelect from './ModelSelect';
 import JMESPathTester from './JMESPathTester';
@@ -47,14 +46,14 @@ function changeValue(obj) {
 
 jsonData = changeValue(jsonData);
   
-const InstanceEditor = () => {
-    const navigate = useNavigate();
+const InstanceEditor = (params) => {
 
     const [dirty, setDirty] = useState(false);
 
     const [inputFields, setInputFields] = useState([]);
 
-    const {instance_id} = useParams();
+    const instance_id = params?.instance_id;
+
     let hasInstanceId = false;
 
     if (instance_id != undefined) {
@@ -63,6 +62,9 @@ const InstanceEditor = () => {
             API.getInstance(instance_id).then(res=>{
                 console.log(res.data.json_data);
                 var json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
+                if (json_data.length === 0 || Object.keys(json_data).length === 0) {
+                  json_data = []
+              }                
                 setInputFields(json_data);
             })
         }
@@ -104,7 +106,7 @@ const InstanceEditor = () => {
           const response = await API.addInstance(inputs);
           console.log(response);
       }
-      navigate("/instances");
+      //navigate("/instances");
 
     };
 
