@@ -8,6 +8,8 @@ import { ListGroup, Button, InputGroup, FormControl } from "react-bootstrap";
 import StatusLight from "./StatusLight";
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
+const PROCESS_POLL_TIME = 10000; // 10 seconds
+
 const useFetch = () => {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -44,6 +46,29 @@ const FlowList = (props) => {
   const [renamingId, setRenamingId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const selected_flow_id = props?.flow_id;
+
+  const [processes, setProcesses] = useState([]);
+  const [isPolling, setIsPolling] = useState(true);
+  const [pollInterval, setPollInterval] = useState(PROCESS_POLL_TIME); 
+  
+  useEffect(() => {
+    const pollProcesses = async () => {
+      try {
+        const response = await API.getProcesses();
+        setProcesses(JSON.parse(response.data));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    pollProcesses();
+  
+    const intervalId = setInterval(pollProcesses, pollInterval);
+  
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [pollInterval]);
 
   const renderTooltip = (props) => (
     <Tooltip id="button-tooltip" {...props}>
@@ -123,30 +148,77 @@ const FlowList = (props) => {
     }
   };
 
-
-    const handleActivate = async (flow) => {
-      const response = await API.addProcess(flow);
-      //window.location.assign("/processes")
-    }
+  // Function to calculate flow process status
+  const getFlowStatus = (flow) => {
   
-    if (loading) {
-      return <div>Loading...</div>;
-    }
-  
-    if (error) {
-      return <div>Error: {error.message}</div>;
-    }
+    //returns option of "configured", "configured", "complete"
 
-    if (!data) {
-      return <div>No data.</div>;
-    }
+    //filter the processes to find the process matching this flow
+    //const flowProcesses = processes.filter((process) => process.name == flow.name);
+    const flowProcesses = processes.filter((process) => process.name == "foo");
 
-    if (Object.keys(data).length === 0) {
-        return (
-          <div>You have no saved flows.</div>
-        );
+    if (flowProcesses.length === 0) {
+      return "";
     }
+    else {
+      if (flowProcesses[0]['statename'] == 'RUNNING') {
+        return "complete"
+      }
+      else {
+        return "configured"
+      }
+    }
+  };
 
+  // Handler to change state
+  const handleChangeState = (flowName) => {
+    //lets try to start the flow process
+    flowName = 'foo'
+
+    const flowProcesses = processes.filter((process) => process.name == flowName);
+
+    if (flowProcesses.length === 0) {
+      return; //do nothing
+    }
+    else {
+      if (flowProcesses[0]['statename'] == 'RUNNING') {
+        API.stopProcess(flowName)
+        .then(() => {
+          console.log("Stopped Process Successfully");
+          setPollInterval(pollInterval+1); //lets change the polling interval to force a refetch
+        })
+        .catch(err => console.log(err));
+      }
+      else {
+        API.startProcess(flowName)
+        .then(() => {
+          console.log("Started Process Successfully");
+          setPollInterval(pollInterval-1); //lets change the polling interval to force a refetch
+        })
+        .catch(err => console.log(err));
+      }
+    }
+  };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
+  if (!data) {
+    return <div>No data.</div>;
+  }
+
+  if (Object.keys(data).length === 0) {
+      return (
+        <div>You have no saved flows.</div>
+      );
+  }
+
+  // Handler to alert the flow name and make the flow name bold
     return (
       <div>
         <div
@@ -243,9 +315,9 @@ const FlowList = (props) => {
                     variant="link"
                     size="sm"
                     className="me-2"
-                    onClick={() => handleChangeState(flow.id)}
+                    onClick={() => handleChangeState(flow.name)}
                   >
-                    <StatusLight status={flow.status}/>
+                    <StatusLight status={getFlowStatus(flow)}/>
                   </Button>
   
                   <Button

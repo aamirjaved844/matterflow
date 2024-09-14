@@ -71,3 +71,39 @@ def new_process(request):
         })
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({'No React flow provided': str(e)}, status=500)
+
+
+@api_view(['POST'])
+def start_process(request):
+    try:
+        # Get the process name from the request
+        process_name = json.loads(request.body)['processName']
+
+        # Create an XML-RPC client
+        server = ServerProxy('http://localhost:9001/RPC2')
+
+        # Start the process
+        result = server.supervisor.startProcess(process_name)
+
+        # Return the result
+        return JsonResponse({'result': result})
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({'Cannot start the process': str(e)}, status=500)
+
+@api_view(['POST'])
+def stop_process(request):
+    try:
+        # Get the process name from the request
+        process_name = json.loads(request.body)['processName']
+
+        # Create an XML-RPC client
+        server = ServerProxy('http://localhost:9001/RPC2')
+
+        # Start the process
+        result = server.supervisor.stopProcess(process_name)
+
+        # Return the result
+        return JsonResponse({'result': result})
+    except (json.JSONDecodeError, KeyError) as e:
+        return JsonResponse({'Cannot stop the process': str(e)}, status=500)
+    
