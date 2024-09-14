@@ -20,7 +20,7 @@ const ModelModal = ({ show, handleClose, modelName, modelId }) => {
       <Modal.Body>
         {/* Insert your form or content here */}
         <div className='w-full'>
-        <ModelEditor model_id={modelId}/>
+        <ModelEditor model_id={modelId} handleClose={handleClose}/>
         </div>
       </Modal.Body>
     </Modal>

@@ -81,6 +81,11 @@ const InstanceEditor = (params) => {
       setInputFields(values);
     };
 
+    const handleClose = (handleCloseHandler) => {
+      //close the modal now
+      handleCloseHandler();
+    }
+
     const handleSubmit = async (e) => {
       e.preventDefault();
       console.log(inputFields);
@@ -107,7 +112,6 @@ const InstanceEditor = (params) => {
           console.log(response);
       }
       //navigate("/instances");
-
     };
 
     
@@ -161,7 +165,7 @@ const InstanceEditor = (params) => {
                 </div>
 
             <div className="container mx-auto p-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(event) => {handleSubmit(event); handleClose(params.handleClose);}} className="space-y-4">
                 {inputFields.map((inputField, index) => (
                 <div key={index} className="flex items-center space-x-2">
                     <TextInput

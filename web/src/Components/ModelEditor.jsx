@@ -34,6 +34,11 @@ const ModelEditor = (params) => {
     }
 
 
+    const handleClose = (handleCloseHandler) => {
+        //close the modal now
+        handleCloseHandler();
+      }
+  
     const handleChangeInput = (index, event) => {
         const exists = inputFields.find(p => p.fieldName === event.target.value);
            
@@ -115,7 +120,7 @@ const ModelEditor = (params) => {
             <div>
                 <h1>Create a Data Model</h1>
             <div className="container mx-auto p-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(event) => {handleSubmit(event); handleClose(params.handleClose);}} className="space-y-4">
                 {inputFields.map((inputField, index) => (
                 <div key={index} className="flex items-center space-x-2">
                     <TextInput

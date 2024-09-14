@@ -20,7 +20,7 @@ const InstanceModal = ({ show, handleClose, instanceName, instanceId }) => {
       <Modal.Body>
         {/* Insert your form or content here */}
         <div className='w-full'>
-        <InstanceEditor instance_id={instanceId}/>
+        <InstanceEditor instance_id={instanceId} handleClose={handleClose}/>
         </div>
       </Modal.Body>
     </Modal>

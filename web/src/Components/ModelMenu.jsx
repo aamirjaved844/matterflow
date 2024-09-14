@@ -1,5 +1,5 @@
 import React from 'react'
-import ModelAndInstanceList from './ModelAndInstanceList'
+import ModelsInstancesList from './ModelsInstancesList'
 
 const ModelMenu = () => {
   return (
@@ -7,7 +7,7 @@ const ModelMenu = () => {
         <h3>Modelling Menu</h3>
         <div>Define your data models and instances.</div>
         <hr />
-        <ModelAndInstanceList/>    
+        <ModelsInstancesList/>    
     </div>
   )
 }
