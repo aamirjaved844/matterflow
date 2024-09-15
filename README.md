@@ -1,6 +1,11 @@
-This is the README file. You can change this and push the changes back to the upstream repo
+This is research project to build data flows for Matter IoT devices. The project builds on the work from the [Visual Programming project](https://github.com/PyWorkflowApp/visual-programming) and is based on React, React Bootstrap and [react-diagrams](https://github.com/projectstorm/react-diagrams)
 
-#Installation
+# User Interface Example
+
+<img src="web/public/matterflowexample.png" width="800">
+
+
+# Installation
 
 ### Server (Django)
 
