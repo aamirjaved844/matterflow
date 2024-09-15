@@ -3,7 +3,7 @@ import FlowList from './FlowList'
 
 const FlowMenu = (props) => {
   return (
-    <div className="FlowMenu">
+    <div className="FlowMenu" style={{ paddingTop: '20px' }}>
         <h3>Flow Menu</h3>
         <div>Control your flows.</div>
         <hr />

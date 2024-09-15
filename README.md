@@ -61,6 +61,7 @@ pip install supervisor
 
 2. Start/Restart the supervisor
 
+Cd to the `api` directory with `supervisord.conf` file
 ```
 supervisord -c ./supervisord.conf 
 ```

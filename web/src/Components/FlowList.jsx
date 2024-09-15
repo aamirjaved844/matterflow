@@ -148,14 +148,20 @@ const FlowList = (props) => {
     }
   };
 
+
+  // Handler to add a new flow and make it bold
+  const handleViewProcesses = () => {
+    window.open('http://127.0.0.1:9001/', '_blank').focus();
+  };
+
   // Function to calculate flow process status
   const getFlowStatus = (flow) => {
   
     //returns option of "configured", "configured", "complete"
 
     //filter the processes to find the process matching this flow
-    //const flowProcesses = processes.filter((process) => process.name == flow.name);
-    const flowProcesses = processes.filter((process) => process.name == "foo");
+    const flowProcesses = processes.filter((process) => process.name == flow.name);
+    //const flowProcesses = processes.filter((process) => process.name == "foo");
 
     if (flowProcesses.length === 0) {
       return "";
@@ -173,12 +179,19 @@ const FlowList = (props) => {
   // Handler to change state
   const handleChangeState = (flowName) => {
     //lets try to start the flow process
-    flowName = 'foo'
+    //flowName = 'foo'
 
     const flowProcesses = processes.filter((process) => process.name == flowName);
 
     if (flowProcesses.length === 0) {
-      return; //do nothing
+      API.addProcess(flowName)
+      .then(() => {
+        console.log("Added Process Successfully");
+        setPollInterval(pollInterval+1); //lets change the polling interval to force a refetch
+      })
+      .catch(err => console.log(err));
+
+//      return; //do nothing
     }
     else {
       if (flowProcesses[0]['statename'] == 'RUNNING') {
@@ -341,10 +354,13 @@ const FlowList = (props) => {
           </ListGroup>
         </div>
   
-        {/* Button to add new flow */}
+        {/* Button to add new flow and browse processes*/}
         <div className="mt-3 text-center">
           <Button variant="primary" onClick={handleAddFlow}>
             Add New Flow
+          </Button>
+          <Button variant="primary" className="ms-2" onClick={handleViewProcesses}>
+            View Processes
           </Button>
         </div>
       </div>
