@@ -77,7 +77,7 @@ supervisord -c ./supervisord.conf
 supervisorctl status
 ```
 
-Note: there should be one process running that is defined the the supervisor_confs folder defined in the foo.conf file
+Note: there should be one process running that is specified in the supervisor_confs folder and defined in the foo.conf file
 
 ### Web Client 
 In a separate terminal window, perform the following steps to start the
