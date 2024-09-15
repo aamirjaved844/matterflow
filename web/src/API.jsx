@@ -105,7 +105,33 @@ export async function addProcess(flow) {
   return fetchWrapper("/process/new", options);
 }
 
+/**
+* Start process on server-side workflow
+* @param {processName} name - processName
+* @returns {Promise<Object>} - server response
+*/
+export async function startProcess(processName) {
+  const payload = { processName: processName } //processName;
+  const options = {
+      method: "POST",
+      body: JSON.stringify(payload), //this is the payload
+  };
+  return fetchWrapper("/process/start", options);
+}
 
+/**
+* Stop process on server-side workflow
+* @param {processName} name - processName
+* @returns {Promise<Object>} - server response
+*/
+export async function stopProcess(processName) {
+  const payload = { processName: processName } //processName;
+  const options = {
+      method: "POST",
+      body: JSON.stringify(payload), //this is the payload
+  };
+  return fetchWrapper("/process/stop", options);
+}
 /**
 * Add flow to server-side workflow
 * @param {FlowModel} node - flow to add

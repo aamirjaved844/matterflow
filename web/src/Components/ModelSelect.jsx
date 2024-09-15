@@ -25,8 +25,13 @@ const useFetch = () => {
                 data = response.data;
             }
 
+            // Filter out empty models
+            const filteredEmpty = data.filter(function (el) {
+                return el.json_data != "{}";
+              });
+
             // Transformed array
-            const transformedData = data.map(item => {
+            const transformedData = filteredEmpty.map(item => {
                 return {
                     value: item.json_data,
                     label: item.name

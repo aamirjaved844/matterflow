@@ -1,7 +1,6 @@
 import React from 'react';
 import { Divider, TextInput, Select,  SelectItem } from '@tremor/react';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
 import JsonTree from './JsonTree';
 import ModelSelect from './ModelSelect';
 import JMESPathTester from './JMESPathTester';
@@ -47,14 +46,14 @@ function changeValue(obj) {
 
 jsonData = changeValue(jsonData);
   
-const InstanceEditor = () => {
-    const navigate = useNavigate();
+const InstanceEditor = (params) => {
 
     const [dirty, setDirty] = useState(false);
 
     const [inputFields, setInputFields] = useState([]);
 
-    const {instance_id} = useParams();
+    const instance_id = params?.instance_id;
+
     let hasInstanceId = false;
 
     if (instance_id != undefined) {
@@ -63,6 +62,9 @@ const InstanceEditor = () => {
             API.getInstance(instance_id).then(res=>{
                 console.log(res.data.json_data);
                 var json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
+                if (json_data.length === 0 || Object.keys(json_data).length === 0) {
+                  json_data = []
+              }                
                 setInputFields(json_data);
             })
         }
@@ -78,6 +80,11 @@ const InstanceEditor = () => {
       values[index][event.target.name] = event.target.value;
       setInputFields(values);
     };
+
+    const handleClose = (handleCloseHandler) => {
+      //close the modal now
+      handleCloseHandler();
+    }
 
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -104,8 +111,7 @@ const InstanceEditor = () => {
           const response = await API.addInstance(inputs);
           console.log(response);
       }
-      navigate("/instances");
-
+      //navigate("/instances");
     };
 
     
@@ -159,7 +165,7 @@ const InstanceEditor = () => {
                 </div>
 
             <div className="container mx-auto p-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={(event) => {handleSubmit(event); handleClose(params.handleClose);}} className="space-y-4">
                 {inputFields.map((inputField, index) => (
                 <div key={index} className="flex items-center space-x-2">
                     <TextInput

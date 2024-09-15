@@ -55,7 +55,7 @@ function NodeMenuItem(props) {
         const tooltip = props.nodeInfo.doc ? formatTooltip(props.nodeInfo.doc) : "This node has no documentation."
         return (
             <OverlayTrigger
-                placement="right"
+                placement="left"
                 delay={{ show: 250, hide: 250 }}
                 overlay={<NodeTooltip message={tooltip} />}>
                 <li className="NodeMenuItem"
@@ -76,7 +76,7 @@ function NodeMenuItem(props) {
         tooltip = formatTooltip(tooltip);
         return (
             <OverlayTrigger
-                placement="right"
+                placement="left"
                 delay={{ show: 250, hide: 250 }}
                 overlay={<NodeTooltip message={tooltip} />}>
                 <li className="NodeMenuItem invalid">{props.nodeInfo.filename}</li>
