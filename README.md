@@ -89,5 +89,5 @@ npm run dev
 ```
 
 By default, your default browser should open on the main
-application page. If not, you can go to [http://localhost:3000/](http://localhost:3000/)
+application page. If not, you can go to [http://localhost:5173/](http://localhost:5173/)
 in your browser.
