@@ -56,7 +56,7 @@ If you have trouble running commands individually, you can also enter the
 virtual environment created by `pipenv` by running `pipenv shell`.
 
 ### Supervisor
-If using supervisord then follow these steps
+This project requires supervisord to control unix based processes which run the flows in tge background. To install supervisor follow these steps:
 
 1. Install supervisor
 
