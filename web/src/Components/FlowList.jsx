@@ -97,15 +97,17 @@ const FlowList = (props) => {
       API.deleteProcess(flow_name)
       .then(() => {
           console.log("Process file deleted successfully");
-          API.deleteFlow(flow_id)
-          .then(() => {
-              console.log("Flow deleted successfully");
-              refetch();
-              if (selected_flow_id == flow_id) {
-                window.location = `/`;
-              }      
-          });  
       });
+      API.deleteFlow(flow_id)
+      .then(() => {
+          console.log("Flow deleted successfully");
+          if (selected_flow_id == flow_id) { //if we are deleting the currently selected flow we need to redirect
+            window.location = `/`;
+          }      
+          else {
+            refetch();
+          }
+      });      
   };
 
   // Handler to start renaming a flow
@@ -159,16 +161,20 @@ const FlowList = (props) => {
   };
 
   // Function to calculate flow process status
-  const getFlowStatus = (flow) => {
+  const getFlowStatus = (flow_name) => {
   
     //returns option of "configured", "configured", "complete"
 
     //filter the processes to find the process matching this flow
-    const flowProcesses = processes.filter((process) => process.name == flow.name);
+    const flowProcesses = processes.filter((process) => process.name == flow_name);
     //const flowProcesses = processes.filter((process) => process.name == "foo");
 
     if (flowProcesses.length === 0) {
       return "";
+    }
+    else if (flowProcesses.length > 1) {
+      console.log("Multiple processes found for flow: " + flow_name);
+      return "unconfigured";
     }
     else {
       if (flowProcesses[0]['statename'] == 'RUNNING') {
@@ -331,7 +337,7 @@ const FlowList = (props) => {
                     className="me-2"
                     onClick={() => handleChangeState(flow.name)}
                   >
-                    <StatusLight status={getFlowStatus(flow)}/>
+                    <StatusLight status={getFlowStatus(flow.name)}/>
                   </Button>
   
                   <Button
