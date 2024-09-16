@@ -93,15 +93,19 @@ const FlowList = (props) => {
     }
   };
 
-  const handleDelete = async (flow_id) => {
-      API.deleteFlow(flow_id)
-        .then(() => {
-            console.log("Flow deleted successfully");
-            refetch();
-            if (selected_flow_id == flow_id) {
-              window.location = `/`;
-            }      
-        });
+  const handleDelete = async (flow_id, flow_name) => {
+      API.deleteProcess(flow_name)
+      .then(() => {
+          console.log("Process file deleted successfully");
+          API.deleteFlow(flow_id)
+          .then(() => {
+              console.log("Flow deleted successfully");
+              refetch();
+              if (selected_flow_id == flow_id) {
+                window.location = `/`;
+              }      
+          });  
+      });
   };
 
   // Handler to start renaming a flow
@@ -180,7 +184,6 @@ const FlowList = (props) => {
   const handleChangeState = (flowName) => {
     //lets try to start the flow process
     //flowName = 'foo'
-
     const flowProcesses = processes.filter((process) => process.name == flowName);
 
     if (flowProcesses.length === 0) {
@@ -190,8 +193,6 @@ const FlowList = (props) => {
         setPollInterval(pollInterval+1); //lets change the polling interval to force a refetch
       })
       .catch(err => console.log(err));
-
-//      return; //do nothing
     }
     else {
       if (flowProcesses[0]['statename'] == 'RUNNING') {
@@ -344,7 +345,7 @@ const FlowList = (props) => {
                   <Button
                     variant="outline-danger"
                     size="sm"
-                    onClick={() => handleDelete(flow.id)}
+                    onClick={() => handleDelete(flow.id, flow.name)}
                   >
                     Delete
                   </Button>

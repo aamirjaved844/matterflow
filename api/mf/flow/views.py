@@ -1,6 +1,7 @@
 import os
 import json
 import sys
+import glob
 
 from matterflow import WorkflowException
 from django.http import JsonResponse, HttpResponse
@@ -139,6 +140,25 @@ def handle_flow(request, flow_id):
                 'message': 'POST successful'
             }, safe=False)
         elif request.method == 'DELETE':
+            try:
+                #Try to Delete the flow files and processes
+                item = json.loads(serializers.serialize("json", FlowModel.objects.filter(pk=flow_id)))
+                flow_name = item[0]['fields']['name']
+
+                #1. Delete the workflows file in the tmpfolder       
+                pattern = f"/tmp/{flow_name}*" 
+                for file_path in glob.glob(pattern):
+                    if os.path.isfile(file_path):
+                        os.remove(file_path)
+
+                #2. Delete the file to the supervisord in supervisor_confs folder       
+                dir_path = os.path.dirname(os.path.realpath(__file__))
+                supervisord_filename = f"{dir_path}/../../supervisor_confs/{flow_name}.conf"
+                os.remove(supervisord_filename)
+            except:
+                pass
+
+            #Delete the flow entry from the database
             FlowModel.objects.filter(pk=flow_id).delete()
             return JsonResponse({
                 'message': 'DELETE successful'

@@ -132,6 +132,21 @@ export async function stopProcess(processName) {
   };
   return fetchWrapper("/process/stop", options);
 }
+
+/**
+* Delete process on server-side workflow
+* @param {processName} name - processName
+* @returns {Promise<Object>} - server response
+*/
+export async function deleteProcess(processName) {
+  const payload = { processName: processName } //processName;
+  const options = {
+      method: "DELETE",
+      body: JSON.stringify(payload), //this is the payload
+  };
+  return fetchWrapper("/process/delete", options);
+}
+
 /**
 * Add flow to server-side workflow
 * @param {FlowModel} node - flow to add

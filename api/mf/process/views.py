@@ -63,11 +63,9 @@ def new_process(request):
         response = { "data": json.dumps(server.supervisor.reloadConfig())}
         response = { "data": json.dumps(server.supervisor.restart())}
         
-        return JsonResponse(response, status=200)
-
         return JsonResponse({
             'Message': 'Process Created',
-            'Request Body': json.dumps(json_data)
+            'Request Body': response
         })
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({'No React flow provided': str(e)}, status=500)
@@ -106,4 +104,73 @@ def stop_process(request):
         return JsonResponse({'result': result})
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({'Cannot stop the process': str(e)}, status=500)
-    
+
+
+@swagger_auto_schema(method='delete',
+                     operation_summary='Delete a process from supervisord',
+                     operation_description='Deletes a process from supervisord.',
+                     responses={
+                         200: 'JSON response with data',
+                         400: 'No file specified',
+                         404: 'Node/graph not found',
+                         405: 'Method not allowed',
+                         500: 'Error processing Node change'
+                     })
+@api_view(['DELETE'])
+@csrf_exempt
+def delete_process(request):
+    """ Delete a process
+
+    Returns:
+        200 - flow was found; data in JSON format
+        404 - flow does not exist
+        405 - Method not allowed
+        500 - Error processing flow change
+    """
+
+    if request is None:
+        return JsonResponse({
+            'message': 'The request does not contain a flow id'
+        }, status=404)
+
+    # Process request
+    print("*******************************")
+    print("processing delete process request")
+    try:
+        if request.method == 'DELETE':
+            # Create an XML-RPC client
+            try:
+                # Get the process name from the request
+                process_name = json.loads(request.body)['processName']
+                print("processing name:" + process_name)
+
+                # Delete the file to the supervisord in supervisor_confs folder       
+                dir_path = os.path.dirname(os.path.realpath(__file__))
+                supervisord_filename = f"{dir_path}/../../supervisor_confs/{process_name}.json.conf"
+                print("supervisord_filename:" + supervisord_filename)
+                os.remove(supervisord_filename)
+            except:
+                return JsonResponse({
+                    'message': 'No process file found'
+                }, status=405)
+
+            server = ServerProxy('http://localhost:9001/RPC2')
+            response = { "data": json.dumps(server.supervisor.reloadConfig())}
+            response = { "data": json.dumps(server.supervisor.restart())}
+
+            #Delete the flow entry from the database
+            return JsonResponse({
+                'Message': 'DELETE successful',
+                'Request Body': response
+            }, safe=False)
+        
+        else:
+            return JsonResponse({
+                'message': request.method + ' not yet handled.'
+            }, status=405)
+    except (WorkflowException) as e:
+        return JsonResponse({e.action: e.reason}, status=500)
+    except ParameterValidationError as e:
+        return JsonResponse({'message': str(e)}, status=500)
+
+    return response

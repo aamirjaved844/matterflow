@@ -161,9 +161,9 @@ const Workspace = (props) => {
      * @param {string} flow_id - The flow ID
      */
     const handleSave = (flow_id) => {
+        //save the flow file to server so we can start the supervisor process
+        API.saveToServer(model.serialize());
 
-//        if (window.confirm("You will lose any unsaved work.")) {
-        
             const json_data = JSON.stringify(model.serialize());
 
             if (flow_id && flow_id != 'new'){
@@ -176,10 +176,7 @@ const Workspace = (props) => {
                 API.updateFlow(flow_id, inputData)
                     .then(() => {
                         console.log("Flow saved successfully");
-                        //save the flow file to server so we can start the supervisor process
-                        API.saveToServer(model.serialize());
                         setIsDirty(false);
-                        //window.location = `/`
                     });
             }
             else {
@@ -192,12 +189,9 @@ const Workspace = (props) => {
                 API.addFlow(inputData)
                     .then((data) => {
                         console.log("Flow created successfully");
-                        //save the flow file to server so we can start the supervisor process
-                        API.saveToServer(model.serialize());
                         window.location = `/${data['Id']}`
                     });
             }
-//        }
     };
 
     /**
