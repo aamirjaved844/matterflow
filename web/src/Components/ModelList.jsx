@@ -54,12 +54,6 @@ const ModelList = () => {
     return <div>No data.</div>;
   }
 
-  if (Object.keys(models).length === 0) {
-      return (
-        <div>You have no saved models.</div>
-      );
-  }
-
   // Handler to alert the item name and make the item name bold
   const handleItemClick = (item) => {
     //alert(`You clicked on: ${item.name}`);
@@ -128,6 +122,19 @@ const ModelList = () => {
     .catch(err => console.log(err));
   };
 
+  if (Object.keys(models).length === 0) {
+    return (
+      <>
+      <div>You have no saved models.</div>
+      {/* Button to add new model */}
+      <div className="mt-3 text-center">
+        <Button variant="primary" onClick={() => handleAddItem()}>
+          Add New Model
+        </Button>
+      </div>
+      </>
+    );
+  }
 
   // Rendering a list of items (models)
   const renderList = (items) => (

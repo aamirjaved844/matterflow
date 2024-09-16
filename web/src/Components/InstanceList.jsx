@@ -54,12 +54,6 @@ const InstanceList = () => {
     return <div>No data.</div>;
   }
 
-  if (Object.keys(instances).length === 0) {
-      return (
-        <div>You have no saved instances.</div>
-      );
-  }
-
   // Handler to alert the item name and make the item name bold
   const handleItemClick = (item) => {
     //alert(`You clicked on: ${item.name}`);
@@ -128,6 +122,19 @@ const InstanceList = () => {
     .catch(err => console.log(err));
   };
 
+  if (Object.keys(instances).length === 0) {
+    return (
+      <>
+        <div>You have no saved instances.</div>
+        {/* Button to add new instance */}
+        <div className="mt-3 text-center">
+          <Button variant="primary" onClick={() => handleAddItem()}>
+            Add New Instance
+          </Button>
+        </div>
+      </>        
+    );
+  }
 
   // Rendering a list of items (instances)
   const renderList = (items) => (
