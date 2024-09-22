@@ -88,6 +88,9 @@ export async function deleteConnection(connection_id) {
 * @returns {Promise<Object>} - server response (connection items)
 */
 export async function getProcesses() {
+  if (window.STORIES != undefined) {
+  return {"data": "[{\"name\": \"2882b829-d663-436e-a6c5-eeb1255ca309\", \"group\": \"2882b829-d663-436e-a6c5-eeb1255ca309\", \"start\": 1727005637, \"stop\": 0, \"now\": 1727007080, \"state\": 20, \"statename\": \"RUNNING\", \"spawnerr\": \"\", \"exitstatus\": 0, \"logfile\": \"/tmp/2882b829-d663-436e-a6c5-eeb1255ca309-stdout---supervisor-4ewjcp45.log\", \"stdout_logfile\": \"/tmp/2882b829-d663-436e-a6c5-eeb1255ca309-stdout---supervisor-4ewjcp45.log\", \"stderr_logfile\": \"/tmp/2882b829-d663-436e-a6c5-eeb1255ca309-stderr---supervisor-rznur_qd.log\", \"pid\": 34624, \"description\": \"pid 34624, uptime 0:24:03\"}, {\"name\": \"foo\", \"group\": \"foo\", \"start\": 1727005637, \"stop\": 0, \"now\": 1727007080, \"state\": 20, \"statename\": \"RUNNING\", \"spawnerr\": \"\", \"exitstatus\": 0, \"logfile\": \"/tmp/foo-stdout---supervisor-q4nfbphz.log\", \"stdout_logfile\": \"/tmp/foo-stdout---supervisor-q4nfbphz.log\", \"stderr_logfile\": \"/tmp/foo-stderr---supervisor-f0wj18dq.log\", \"pid\": 34625, \"description\": \"pid 34625, uptime 0:24:03\"}]"};
+  }
   return fetchWrapper("/process");
 }
 
@@ -111,6 +114,9 @@ export async function addProcess(flow) {
 * @returns {Promise<Object>} - server response
 */
 export async function startProcess(processName) {
+  if (window.STORIES != undefined) {
+    return {"result": true};
+  }
   const payload = { processName: processName } //processName;
   const options = {
       method: "POST",
@@ -125,6 +131,9 @@ export async function startProcess(processName) {
 * @returns {Promise<Object>} - server response
 */
 export async function stopProcess(processName) {
+  if (window.STORIES != undefined) {
+    return {"result": true};
+  }
   const payload = { processName: processName } //processName;
   const options = {
       method: "POST",
@@ -153,6 +162,9 @@ export async function deleteProcess(processName) {
 * @returns {Promise<Object>} - server response
 */
 export async function addFlow(flow) {
+  if (window.STORIES != undefined) {
+    return {"Message": "Flow Created", "Id": 210, "Request Body": "{\"name\": \"bbfb4758-48d8-4b70-9306-bf10e65ff860\", \"description\": \"flow-rwftq4\", \"json_data\": \"{\\\"id\\\":\\\"bbfb4758-48d8-4b70-9306-bf10e65ff860\\\",\\\"offsetX\\\":0,\\\"offsetY\\\":0,\\\"zoom\\\":100,\\\"gridSize\\\":0,\\\"layers\\\":[{\\\"id\\\":\\\"7858af38-452e-49ea-99a8-4af3e31c66d9\\\",\\\"type\\\":\\\"diagram-links\\\",\\\"isSvg\\\":true,\\\"transformed\\\":true,\\\"models\\\":{}},{\\\"id\\\":\\\"504eba09-2c8b-43d3-88c2-62a80a196445\\\",\\\"type\\\":\\\"diagram-nodes\\\",\\\"isSvg\\\":false,\\\"transformed\\\":true,\\\"models\\\":{}}]}\"}"};
+  }
   const payload = flow;
   const options = {
       method: "POST",
@@ -166,6 +178,9 @@ export async function addFlow(flow) {
 * @returns {Promise<Object>} - server response (flow items)
 */
 export async function getFlows() {
+  if (window.STORIES != undefined) {
+    return {"data": [{"id": 206, "name": "2882b829-d663-436e-a6c5-eeb1255ca309", "description": "flow-x3170j", "json_data": "{\"id\":\"2882b829-d663-436e-a6c5-eeb1255ca309\",\"offsetX\":0,\"offsetY\":0,\"zoom\":100,\"gridSize\":0,\"layers\":[{\"id\":\"9ead6483-6509-4aa0-87db-714b15e3ae9c\",\"type\":\"diagram-links\",\"isSvg\":true,\"transformed\":true,\"models\":{}},{\"id\":\"caeec8ce-327d-4cd4-8078-1024e78544af\",\"type\":\"diagram-nodes\",\"isSvg\":false,\"transformed\":true,\"models\":{\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\":{\"id\":\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\",\"type\":\"custom-node\",\"x\":335.5,\"y\":284,\"ports\":[{\"id\":\"d4022bcf-624f-4d87-ab59-1e6b799b3001\",\"type\":\"mf-port\",\"x\":347.51666259765625,\"y\":308,\"name\":\"flow-in\",\"alignment\":\"left\",\"parentNode\":\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\",\"links\":[],\"in\":true,\"label\":\"flow-in\"},{\"id\":\"6e0696e5-9570-4598-8d79-08577d9c9b4b\",\"type\":\"mf-port\",\"x\":429.51666259765625,\"y\":325,\"name\":\"out-0\",\"alignment\":\"right\",\"parentNode\":\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\",\"links\":[],\"in\":false,\"label\":\"out-0\"}],\"options\":{\"id\":\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\",\"name\":\"WS Connection\",\"node_key\":\"WsConnectionNode\",\"node_type\":\"connection\",\"num_in\":0,\"num_out\":1,\"color\":\"blue\",\"filename\":\"ws_connection\",\"doc\":\"WsConnectionNode\\n\\n    Reads a Websocket into a workflow.\\n\\n    Raises:\\n         NodeException: any error reading web socket, converting\\n            to workflow.\\n    \",\"option_types\":{\"file\":{\"type\":\"file\",\"label\":\"Test Json\",\"value\":\"\",\"docstring\":\"Json File\"}},\"download_result\":false,\"type\":\"custom-node\",\"node_id\":\"b5464292-f9d9-42b7-b995-8e1bfe3ceab3\",\"status\":\"unconfigured\"},\"config\":{\"file\":\"\"}}}}]}"}]};
+  }
   return fetchWrapper("/flow");
 }
 
@@ -176,6 +191,9 @@ export async function getFlows() {
 * @returns {Promise<Object>} - server response (serialized node)
 */
 export async function updateFlow(flow_id, config) {
+  if (window.STORIES != undefined) {
+    return {"message": "POST successful"};  
+  }
   const payload = config;
   const options = {
       method: "POST",
@@ -190,6 +208,9 @@ export async function updateFlow(flow_id, config) {
  * @returns {Promise<Object>} - server response (flow info)
  */
 export async function getFlow(flowId) {
+  if (window.STORIES != undefined) {
+    return {"data": {"id": "207", "name": "720c2cc1-574d-4edd-8cb2-0efdadf3faaa", "description": "flow-al7tjf", "json_data": "{\"id\":\"720c2cc1-574d-4edd-8cb2-0efdadf3faaa\",\"offsetX\":0,\"offsetY\":0,\"zoom\":100,\"gridSize\":0,\"layers\":[{\"id\":\"51a13f2b-1770-4a15-ac9a-d627cb1ef547\",\"type\":\"diagram-links\",\"isSvg\":true,\"transformed\":true,\"models\":{}},{\"id\":\"2f408b04-5590-45ff-8f2c-46c2d3fa47d1\",\"type\":\"diagram-nodes\",\"isSvg\":false,\"transformed\":true,\"models\":{}}]}"}};
+  }
   return fetchWrapper(`/flow/${flowId}`);
 }
 
@@ -200,6 +221,9 @@ export async function getFlow(flowId) {
 * @returns {Promise<Object>} - server response
 */
 export async function deleteFlow(flow_id) {
+  if (window.STORIES != undefined) {
+    return {"Message": "DELETE successful", "Request Body": {"data": "true"}};
+  }
   const options = {
       method: "DELETE"
   };
@@ -211,6 +235,9 @@ export async function deleteFlow(flow_id) {
 * @returns {Promise<Object>} - server response (connection items)
 */
 export async function getModels() {
+  if (window.STORIES != undefined) {
+    return {"data": [{"id": 7, "name": "model name", "description": "model1", "json_data": "[{'fieldName': 'ts', 'fieldDatatype': 'Timestamp', 'fieldNameError': ''}, {'fieldName': 'nodeId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'endpointId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'clusterId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'attributeId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'value', 'fieldDatatype': 'Object', 'fieldNameError': ''}, {'fieldName': 'vendorName', 'fieldDatatype': 'String', 'fieldNameError': ''}, {'fieldName': 'productName', 'fieldDatatype': 'String', 'fieldNameError': ''}]"}, {"id": 11, "name": "newModel8.json", "description": "model2", "json_data": "[{'fieldName': 'test', 'fieldDatatype': 'String', 'fieldNameError': ''}]"}]}
+  }
   return fetchWrapper("/model");
 }
 
@@ -220,6 +247,9 @@ export async function getModels() {
 * @returns {Promise<Object>} - server response
 */
 export async function addModel(flow) {
+  if (window.STORIES != undefined) {
+    return {"Message": "Model Created", "Request Body": "{\"id\": 13, \"description\": \"unique13\", \"name\": \"newModel13.json\", \"json_data\": {}}"};
+  }
   const payload = flow;
   const options = {
       method: "POST",
@@ -235,6 +265,9 @@ export async function addModel(flow) {
 * @returns {Promise<Object>} - server response (serialized node)
 */
 export async function updateModel(model_id, config) {
+  if (window.STORIES != undefined) {
+    return {"message": "POST successful"};
+  }
   const payload = config;
   const options = {
       method: "POST",
@@ -249,6 +282,9 @@ export async function updateModel(model_id, config) {
  * @returns {Promise<Object>} - server response (model info)
  */
 export async function getModel(modelId) {
+  if (window.STORIES != undefined) {
+    return {"data": {"id": "7", "name": "model name", "description": "model1", "json_data": "[{'fieldName': 'ts', 'fieldDatatype': 'Timestamp', 'fieldNameError': ''}, {'fieldName': 'nodeId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'endpointId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'clusterId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'attributeId', 'fieldDatatype': 'Number', 'fieldNameError': ''}, {'fieldName': 'value', 'fieldDatatype': 'Object', 'fieldNameError': ''}, {'fieldName': 'vendorName', 'fieldDatatype': 'String', 'fieldNameError': ''}, {'fieldName': 'productName', 'fieldDatatype': 'String', 'fieldNameError': ''}]"}};
+  }
   return fetchWrapper(`/model/${modelId}`);
 }
 
@@ -259,6 +295,9 @@ export async function getModel(modelId) {
 * @returns {Promise<Object>} - server response
 */
 export async function deleteModel(model_id) {
+  if (window.STORIES != undefined) {
+    return {"message": "DELETE successful"};
+  }
   const options = {
       method: "DELETE"
   };
@@ -270,6 +309,9 @@ export async function deleteModel(model_id) {
 * @returns {Promise<Object>} - server response (connection items)
 */
 export async function getInstances() {
+  if (window.STORIES != undefined) {
+    return {"data": [{"id": 6, "name": "instance - 14/9/2024, 12:44:25", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"ts\",\"fieldDatatype\":\"Timestamp\",\"fieldValue\":\"\"},{\"fieldName\":\"nodeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[0]\"},{\"fieldName\":\"endpointId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1]|keys(@)|[0]\"},{\"fieldName\":\"clusterId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\"|keys(@)|[0]\"},{\"fieldName\":\"attributeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\".\\\"{clusterId}\\\"|keys(@)|[0]\"},{\"fieldName\":\"value\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\".\\\"{clusterId}\\\".\\\"{attributeId}\\\"\"},{\"fieldName\":\"vendorName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"[?node_id == `{nodeId}`].attributes.\\\"0\\\".\\\"40\\\".\\\"1\\\"|[0]\"},{\"fieldName\":\"productName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"[?node_id == `{nodeId}`].attributes.\\\"0\\\".\\\"40\\\".\\\"3\\\"|[0]\"}]"}, {"id": 7, "name": "instance - 14/9/2024, 14:36:00", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"ts\",\"fieldDatatype\":\"Timestamp\",\"fieldValue\":\"\"},{\"fieldName\":\"nodeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"endpointId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"clusterId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"attributeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"value\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"\"},{\"fieldName\":\"vendorName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"\"},{\"fieldName\":\"productName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"asas\"}]"}, {"id": 9, "name": "instance - 14/9/2024, 14:30:35", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"test\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"\"}]"}]};
+  }
   return fetchWrapper("/instance");
 }
 
@@ -279,6 +321,9 @@ export async function getInstances() {
 * @returns {Promise<Object>} - server response
 */
 export async function addInstance(flow) {
+  if (window.STORIES != undefined) {
+    return {"data": [{"id": 6, "name": "instance - 14/9/2024, 12:44:25", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"ts\",\"fieldDatatype\":\"Timestamp\",\"fieldValue\":\"\"},{\"fieldName\":\"nodeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[0]\"},{\"fieldName\":\"endpointId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1]|keys(@)|[0]\"},{\"fieldName\":\"clusterId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\"|keys(@)|[0]\"},{\"fieldName\":\"attributeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\".\\\"{clusterId}\\\"|keys(@)|[0]\"},{\"fieldName\":\"value\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"[?event == `attribute_updated`].data|[0]|[1].\\\"{endpointId}\\\".\\\"{clusterId}\\\".\\\"{attributeId}\\\"\"},{\"fieldName\":\"vendorName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"[?node_id == `{nodeId}`].attributes.\\\"0\\\".\\\"40\\\".\\\"1\\\"|[0]\"},{\"fieldName\":\"productName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"[?node_id == `{nodeId}`].attributes.\\\"0\\\".\\\"40\\\".\\\"3\\\"|[0]\"}]"}, {"id": 7, "name": "instance - 14/9/2024, 14:36:00", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"ts\",\"fieldDatatype\":\"Timestamp\",\"fieldValue\":\"\"},{\"fieldName\":\"nodeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"endpointId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"clusterId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"attributeId\",\"fieldDatatype\":\"Number\",\"fieldValue\":\"\"},{\"fieldName\":\"value\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"\"},{\"fieldName\":\"vendorName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"\"},{\"fieldName\":\"productName\",\"fieldDatatype\":\"String\",\"fieldValue\":\"asas\"}]"}, {"id": 9, "name": "instance - 14/9/2024, 14:30:35", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"test\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"\"}]"}, {"id": 10, "name": "newInstance10.json", "description": "unique10", "json_data": "{}"}, {"id": 11, "name": "newInstance11.json", "description": "unique11", "json_data": "{}"}]};
+  }
   const payload = flow;
   const options = {
       method: "POST",
@@ -294,6 +339,9 @@ export async function addInstance(flow) {
 * @returns {Promise<Object>} - server response (serialized node)
 */
 export async function updateInstance(instance_id, config) {
+  if (window.STORIES != undefined) {
+    return {"message": "POST successful"};
+  }
   const payload = config;
   const options = {
       method: "POST",
@@ -308,6 +356,9 @@ export async function updateInstance(instance_id, config) {
  * @returns {Promise<Object>} - server response (instance info)
  */
 export async function getInstance(instanceId) {
+  if (window.STORIES != undefined) {
+    return {"data": {"id": "9", "name": "instance - 14/9/2024, 14:30:35", "description": "instance descriptipn", "json_data": "[{\"fieldName\":\"test\",\"fieldDatatype\":\"Object\",\"fieldValue\":\"\"}]"}};
+  }
   return fetchWrapper(`/instance/${instanceId}`);
 }
 
@@ -318,6 +369,9 @@ export async function getInstance(instanceId) {
 * @returns {Promise<Object>} - server response
 */
 export async function deleteInstance(instance_id) {
+  if (window.STORIES != undefined) {
+    return {"message": "DELETE successful"};
+  }
   const options = {
       method: "DELETE"
   };
@@ -366,6 +420,9 @@ export async function getNode(nodeId) {
 * @returns {Promise<Object>} - server response
 */
 export async function addNode(node) {
+  if (window.STORIES != undefined) {
+  return {"message": "Added new node to graph with id: 75a02755-a379-4d0b-861d-8534f1843ce0"};
+  }
   const payload = {...node.options, options: node.config};
   const options = {
       method: "POST",
@@ -381,6 +438,9 @@ export async function addNode(node) {
 * @returns {Promise<Object>} - server response
 */
 export async function deleteNode(node) {
+  if (window.STORIES != undefined) {
+    return {"message": "Removed node ID #892b8e23-38eb-477a-a01d-d3aa3d1852ee"};
+  }
   const id = node.options.id;
   const options = {
       method: "DELETE"
@@ -432,6 +492,9 @@ export async function save(diagramData) {
 * @param {Object} diagramData - serialized react-diagrams model
 */
 export async function saveToServer(diagramData) {
+  if (window.STORIES != undefined) {
+    return {"filename": "720c2cc1-574d-4edd-8cb2-0efdadf3faaa.json", "react": {"id": "720c2cc1-574d-4edd-8cb2-0efdadf3faaa", "offsetX": 0, "offsetY": 0, "zoom": 100, "gridSize": 0, "layers": [{"id": "51a13f2b-1770-4a15-ac9a-d627cb1ef547", "type": "diagram-links", "isSvg": true, "transformed": true, "models": {}}, {"id": "2f408b04-5590-45ff-8f2c-46c2d3fa47d1", "type": "diagram-nodes", "isSvg": false, "transformed": true, "models": {"d054a431-236d-4940-8055-5f251f4c4851": {"id": "d054a431-236d-4940-8055-5f251f4c4851", "type": "custom-node", "x": 270.5, "y": 228, "ports": [{"id": "0fb72967-2cd9-406b-a48f-bfb38c254edf", "type": "mf-port", "x": 282.51666259765625, "y": 252, "name": "flow-in", "alignment": "left", "parentNode": "d054a431-236d-4940-8055-5f251f4c4851", "links": [], "in": true, "label": "flow-in"}, {"id": "35a5e72b-53a7-470e-a676-c2c4537b1b65", "type": "mf-port", "x": 364.51666259765625, "y": 269, "name": "out-0", "alignment": "right", "parentNode": "d054a431-236d-4940-8055-5f251f4c4851", "links": [], "in": false, "label": "out-0"}], "options": {"id": "d054a431-236d-4940-8055-5f251f4c4851", "name": "WS Connection", "node_key": "WsConnectionNode", "node_type": "connection", "num_in": 0, "num_out": 1, "color": "blue", "filename": "ws_connection", "doc": "WsConnectionNode\n\n    Reads a Websocket into a workflow.\n\n    Raises:\n         NodeException: any error reading web socket, converting\n            to workflow.\n    ", "option_types": {"file": {"type": "file", "label": "Test Json", "value": "", "docstring": "Json File"}}, "download_result": false, "type": "custom-node", "node_id": "d054a431-236d-4940-8055-5f251f4c4851", "status": "unconfigured"}, "config": {"file": ""}}}}]}, "matterflow": {"name": "720c2cc1-574d-4edd-8cb2-0efdadf3faaa", "root_dir": "/tmp", "graph": {"directed": true, "multigraph": false, "graph": {}, "nodes": [{"name": "WS Connection", "node_id": "d054a431-236d-4940-8055-5f251f4c4851", "node_type": "connection", "node_key": "WsConnectionNode", "data": null, "filename": "ws_connection", "is_global": false, "options": {"file": ""}, "option_replace": {}, "id": "d054a431-236d-4940-8055-5f251f4c4851"}], "links": []}, "flow_vars": {"directed": false, "multigraph": false, "graph": {}, "nodes": [], "links": []}}};
+  }
   const payload = JSON.stringify(diagramData);
   const options = {
       method: "POST",
@@ -448,6 +511,9 @@ export async function saveToServer(diagramData) {
 * @returns {Promise<Object>} - server response (node menu items)
 */
 export async function getNodes() {
+  if (window.STORIES != undefined) {
+    return {"Manipulation": [{"name": "Pivoting", "node_key": "PivotNode", "node_type": "manipulation", "num_in": 1, "num_out": 3, "color": "goldenrod", "filename": "pivot", "doc": null, "options": {"index": null, "values": null, "columns": null, "aggfunc": "mean", "fill_value": null, "margins": false, "dropna": true, "margins_name": "All", "observed": false}, "option_types": {"index": {"type": "string", "label": "Index", "value": null, "docstring": "Column to aggregate (column, grouper, array or list)"}, "values": {"type": "string", "label": "Values", "value": null, "docstring": "Column name to use to populate new frame's values (column, grouper, array or list)"}, "columns": {"type": "string", "label": "Column Name Row", "value": null, "docstring": "Column(s) to use for populating new frame values. (column, grouper, array or list)"}, "aggfunc": {"type": "string", "label": "Aggregation function", "value": "mean", "docstring": "Function used for aggregation (function, list of functions, dict, default numpy.mean)"}, "fill_value": {"type": "string", "label": "Fill value", "value": null, "docstring": "Value to replace missing values with (scalar)"}, "margins": {"type": "boolean", "label": "Margins name", "value": false, "docstring": "Add all rows/columns"}, "dropna": {"type": "boolean", "label": "Drop NaN columns", "value": true, "docstring": "Ignore columns with all NaN entries"}, "margins_name": {"type": "string", "label": "Margins name", "value": "All", "docstring": "Name of the row/column that will contain the totals when margins is True"}, "observed": {"type": "boolean", "label": "Column Name Row", "value": false, "docstring": "Row number with column names (0-indexed) or \"infer\""}}, "download_result": false}, {"name": "Mapping", "node_key": "MappingNode", "node_type": "manipulation", "num_in": 1, "num_out": 1, "color": "goldenrod", "filename": "mapping", "doc": null, "options": {"modelmapping": null}, "option_types": {"modelmapping": {"type": "instanceselect", "label": "ModelMapping", "value": null, "docstring": null, "options": []}}, "download_result": false}, {"name": "Joiner", "node_key": "JoinNode", "node_type": "manipulation", "num_in": 2, "num_out": 1, "color": "goldenrod", "filename": "join", "doc": null, "options": {"on": null}, "option_types": {"on": {"type": "string", "label": "Join Column", "value": null, "docstring": "Name of column to join on"}}, "download_result": false}, {"name": "Combiner", "node_key": "CombineNode", "node_type": "manipulation", "num_in": 2, "num_out": 1, "color": "goldenrod", "filename": "combine", "doc": null, "options": {}, "option_types": {}, "download_result": false}, {"name": "Unflatten", "node_key": "UnflattenNode", "node_type": "manipulation", "num_in": 1, "num_out": 1, "color": "goldenrod", "filename": "unflatten", "doc": null, "options": {}, "option_types": {}, "download_result": false}, {"name": "Filter", "node_key": "FilterNode", "node_type": "manipulation", "num_in": 1, "num_out": 1, "color": "goldenrod", "filename": "filter", "doc": null, "options": {"filter": "*", "include": true, "data": false}, "option_types": {"filter": {"type": "string", "label": "Filter", "value": "*", "docstring": "Jmespath query to filter"}, "include": {"type": "boolean", "label": "Include", "value": true, "docstring": "Include entries found by filter"}, "data": {"type": "boolean", "label": "Output Filtered Data", "value": false, "docstring": "Output filtered data instead of original data entry"}}, "download_result": false}], "Visualization": [{"name": "Graph Node", "node_key": "GraphNode", "node_type": "visualization", "num_in": 1, "num_out": 0, "color": "red", "filename": "graph", "doc": "Displays a pandas DataFrame in a visual graph.\n\n    Raises:\n        NodeException: any error generating Altair Chart.\n    ", "options": {"graph_type": "bar", "mark_options": false, "width": 10, "height": 10, "encode_options": true, "x_axis": "a", "y_axis": "average(b)"}, "option_types": {"graph_type": {"type": "select", "label": "Graph Type", "value": "bar", "docstring": "Graph viz type", "options": ["area", "bar", "line", "point"]}, "mark_options": {"type": "boolean", "label": "Specify mark options", "value": false, "docstring": "Specify mark options"}, "width": {"type": "int", "label": "Mark width", "value": 10, "docstring": "Width of marks"}, "height": {"type": "int", "label": "Mark height", "value": 10, "docstring": "Height of marks"}, "encode_options": {"type": "boolean", "label": "Specify encoding options", "value": true, "docstring": "Specify encoding options"}, "x_axis": {"type": "string", "label": "X-Axis", "value": "a", "docstring": "X-axis values"}, "y_axis": {"type": "string", "label": "Y-Axis", "value": "average(b)", "docstring": "Y-axis values"}}, "download_result": false}], "Connection": [{"name": "WS Connection", "node_key": "WsConnectionNode", "node_type": "connection", "num_in": 0, "num_out": 1, "color": "blue", "filename": "ws_connection", "doc": "WsConnectionNode\n\n    Reads a Websocket into a workflow.\n\n    Raises:\n         NodeException: any error reading web socket, converting\n            to workflow.\n    ", "options": {"file": ""}, "option_types": {"file": {"type": "file", "label": "Test Json", "value": "", "docstring": "Json File"}}, "download_result": false}], "  Pycache  ": [], "I/O": [{"name": "Table Creator", "node_key": "TableCreatorNode", "node_type": "io", "num_in": 0, "num_out": 1, "color": "green", "filename": "table_creator", "doc": "Accepts raw-text CSV input to create data tables.\n\n    Raises:\n         NodeException: any error reading CSV file, converting\n            to DataFrame.\n    ", "options": {"input": "", "sep": ",", "header": "infer"}, "option_types": {"input": {"type": "text", "label": "Input", "value": "", "docstring": "Text input"}, "sep": {"type": "string", "label": "Delimiter", "value": ",", "docstring": "Column delimiter"}, "header": {"type": "string", "label": "Header Row", "value": "infer", "docstring": "Row number containing column names (0-indexed)"}}, "download_result": false}, {"name": "Write Json", "node_key": "WriteJsonNode", "node_type": "io", "num_in": 1, "num_out": 0, "color": "green", "filename": "write_json", "doc": "WriteJsonNode\n\n    Writes the current json to a Json file.\n\n    Raises:\n        NodeException: any error writing Json file, converting\n            from json data.\n    ", "options": {"file": null, "write_mode": "append", "exclude": ""}, "option_types": {"file": {"type": "string", "label": "Filename", "value": null, "docstring": "CSV file to write"}, "write_mode": {"type": "select", "label": "Write Mode", "value": "append", "docstring": "Overwrite or append to file", "options": ["overwrite", "append"]}, "exclude": {"type": "string", "label": "Exclude", "value": "", "docstring": "Exclude json matching this jmespath query"}}, "download_result": true}, {"name": "Write CSV", "node_key": "WriteCsvNode", "node_type": "io", "num_in": 1, "num_out": 0, "color": "green", "filename": "write_csv", "doc": "WriteCsvNode\n\n    Writes the current DataFrame to a CSV file.\n\n    Raises:\n        NodeException: any error writing CSV file, converting\n            from DataFrame.\n    ", "options": {"file": null, "sep": ",", "index": true}, "option_types": {"file": {"type": "string", "label": "Filename", "value": null, "docstring": "CSV file to write"}, "sep": {"type": "string", "label": "Delimiter", "value": ",", "docstring": "Column delimiter"}, "index": {"type": "boolean", "label": "Write Index", "value": true, "docstring": "Write index as column?"}}, "download_result": true}, {"name": "Read Json", "node_key": "ReadJsonNode", "node_type": "io", "num_in": 0, "num_out": 1, "color": "green", "filename": "read_json", "doc": "ReadJsonNode\n\n    Reads a Json file into a workflow.\n\n    Raises:\n         NodeException: any error reading json file, converting\n            to workflow.\n    ", "options": {"file": null}, "option_types": {"file": {"type": "file", "label": "File", "value": null, "docstring": "Json File"}}, "download_result": false}, {"name": "Read CSV", "node_key": "ReadCsvNode", "node_type": "io", "num_in": 0, "num_out": 1, "color": "green", "filename": "read_csv", "doc": "ReadCsvNode\n\n    Reads a CSV file into a pandas DataFrame.\n\n    Raises:\n         NodeException: any error reading CSV file, converting\n            to DataFrame.\n    ", "options": {"file": null, "sep": ",", "header": "infer"}, "option_types": {"file": {"type": "file", "label": "File", "value": null, "docstring": "CSV File"}, "sep": {"type": "string", "label": "Delimiter", "value": ",", "docstring": "Column delimiter"}, "header": {"type": "string", "label": "Header Row", "value": "infer", "docstring": "Row number containing column names (0-indexed)"}}, "download_result": false}], "Flow Control": [{"name": "String Input", "node_key": "StringNode", "node_type": "flow_control", "num_in": 0, "num_out": 0, "color": "purple", "filename": "string_input", "doc": "StringNode object\n\n    Allows for Strings to replace 'string' fields in Nodes\n    ", "options": {"default_value": null, "var_name": "my_var"}, "option_types": {"default_value": {"type": "string", "label": "Default Value", "value": null, "docstring": "Value this node will pass as a flow variable"}, "var_name": {"type": "string", "label": "Variable Name", "value": "my_var", "docstring": "Name of the variable to use in another Node"}}, "download_result": false}, {"name": "Integer Input", "node_key": "IntegerNode", "node_type": "flow_control", "num_in": 0, "num_out": 0, "color": "purple", "filename": "integer_input", "doc": "StringNode object\n\n    Allows for Strings to replace 'string' fields in Nodes\n    ", "options": {"default_value": null, "var_name": "my_var"}, "option_types": {"default_value": {"type": "int", "label": "Default Value", "value": null, "docstring": "Value this node will pass as a flow variable"}, "var_name": {"type": "string", "label": "Variable Name", "value": "my_var", "docstring": "Name of the variable to use in another Node"}}, "download_result": false}], "Custom Nodes": []}
+  }    
   return fetchWrapper("/workflow/nodes");
 }
 
@@ -457,6 +523,9 @@ export async function getNodes() {
 * @returns {Promise<Object>} - server response (global flow variables)
 */
 export async function getGlobalVars() {
+  if (window.STORIES != undefined) {
+  return [];
+  }
   return fetchWrapper("/workflow/globals");
 }
 
@@ -467,6 +536,9 @@ export async function getGlobalVars() {
 * @returns {Promise<Object>} - server response
 */
 export async function initWorkflow(model) {
+  if (window.STORIES != undefined) {
+    return {"directed": true, "multigraph": false, "graph": {}, "nodes": [], "links": []};
+  }
   const options = {
       method: "POST",
       body: JSON.stringify({
@@ -516,6 +588,9 @@ async function handleEdge(link, method) {
 * @returns {Promise<Object>} - server response
 */
 export async function addEdge(link) {
+  if (window.STORIES != undefined) {
+   return {"edge_added": ["f44be0d5-d26a-4ee7-b9a4-6bdadf428edb", "946accee-d4ad-413b-a429-e3e407c815c7"]}  
+  }
   return handleEdge(link, "POST");
 }
 
@@ -526,7 +601,10 @@ export async function addEdge(link) {
 * @returns {Promise<Object>} - server response
 */
 export async function deleteEdge(link) {
-  return handleEdge(link, "DELETE");
+  if (window.STORIES != undefined) {
+    return {"edge_deleted": ["f44be0d5-d26a-4ee7-b9a4-6bdadf428edb", "946accee-d4ad-413b-a429-e3e407c815c7"]}  
+   }
+   return handleEdge(link, "DELETE");
 }
 
 
@@ -588,6 +666,9 @@ export async function executionOrder() {
 * @returns {Promise<Object>} - server response
 */
 export async function execute(node) {
+  if (window.STORIES != undefined) {
+    return ["650086cd-8f30-4ab7-b1d6-64ded6ceeaad"];
+  }
   const id = node.options.id;
   return fetchWrapper(`/node/${id}/execute`);
 }
@@ -598,5 +679,8 @@ export async function execute(node) {
 * @returns {Promise<Object>} - json respnse with the data at specified state
 */
 export async function retrieveData(nodeId) {
-return fetchWrapper(`/node/${nodeId}/retrieve_data`);
+  if (window.STORIES != undefined) {
+    return {"data": "data"}
+  }
+  return fetchWrapper(`/node/${nodeId}/retrieve_data`);
 }

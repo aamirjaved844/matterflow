@@ -96,3 +96,20 @@ npm run dev
 By default, your default browser should open on the main
 application page. If not, you can go to [http://localhost:5173/](http://localhost:5173/)
 in your browser.
+
+### Storybook
+
+It is possible to run the react components in Storybook. The backend is mocked in that case.
+If running as Storybook, then the backend API will only provide static information and the
+functionality of adding, deleting, modifying, saving etc will not be saved to the backend
+
+1. Run as Storybook
+```
+cd web
+npm run storybook
+```
+
+Note: it is not recommended to run as storybook as the lack of backend functionality will 
+impact the functionality of the front end.
+
+
