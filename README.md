@@ -20,7 +20,7 @@ cd api
 source venv/bin/activate
 ```
 
-***On Mac OS
+***On Mac OS***
 Installing and activating python3.12 on Mac OS
 
 Ensure you install python3.12
