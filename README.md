@@ -37,12 +37,6 @@ source venv/bin/activate
 ```
 
 2. Install `pipenv`
-
-- **Homebrew**
-       
-```
-brew install pipenv
-```
        
 - **pip**
     
