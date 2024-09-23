@@ -20,6 +20,22 @@ cd api
 source venv/bin/activate
 ```
 
+***On Mac OS
+Installing and activating python3.12 on Mac OS
+
+Ensure you install python3.12
+
+```
+brew install python@3.12
+```
+
+Ensure you use the correct python binary path when activating the environment
+
+```
+/usr/local/bin/python3 -m venv ./venv
+source venv/bin/activate
+```
+
 2. Install `pipenv`
 
 - **Homebrew**
