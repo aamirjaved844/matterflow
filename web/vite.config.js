@@ -7,15 +7,15 @@ export default defineConfig({
     host: true,
     proxy: {
       "/info": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
       },
       "/workflow": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
       },
       "/node": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
             if (req.url.startsWith('/node_modules')) {
@@ -25,7 +25,7 @@ export default defineConfig({
         }
       },
       "/connection": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
           if (req.url.startsWith('/connections')) {
@@ -35,7 +35,7 @@ export default defineConfig({
         }
       },
       "/flow": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
           if (req.url.startsWith('/flows')) {
@@ -45,7 +45,7 @@ export default defineConfig({
         }
       },
       "/process": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
           if (req.url.startsWith('/processes')) {
@@ -55,7 +55,7 @@ export default defineConfig({
         }
       },
       "/model": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
           if (req.url.startsWith('/models')) {
@@ -65,7 +65,7 @@ export default defineConfig({
         }
       },
       "/instance": {
-        target: "http://localhost:8000",
+        target: "http://127.0.0.1:8000",
         secure: false,
         bypass: function(req, res, proxyOptions) {
           if (req.url.startsWith('/instances')) {
