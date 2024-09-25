@@ -20,7 +20,7 @@ class WorkflowMiddleware:
         if not path.startswith('/workflow/') and not path.startswith('/node/'):
             # Workflow needed only for /workflow and /node routes
             pass
-        elif path == '/workflow/open' or path == '/workflow/new':
+        elif path == '/workflow/open' or path == '/workflow/new' or path == '/workflow/activate':
             # 'open' loads from file upload, 'new' inits new Workflow
             pass
         else:

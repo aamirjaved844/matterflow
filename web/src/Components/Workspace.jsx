@@ -45,7 +45,7 @@ const Workspace = (props) => {
         if (flow_id && flow_id != 'new') {
             API.getFlow(flow_id).then((value) => {
                 try {
-                    diagramData.current = JSON.parse(value.data.json_data);
+                    diagramData.current = JSON.parse(value.data.json_data)["react"];
                 } catch {
                     console.log("Invalid or missing json data");
                     diagramData.current = {};
@@ -60,10 +60,13 @@ const Workspace = (props) => {
                         })
                         .catch(err => console.log(err));
                 } else {
-                    model.deserializeModel(diagramData.current, engine);
-                    setTimeout(() => engine.repaintCanvas(), 100);
-                    getGlobalVars();
-                    getAvailableNodes();
+                    //activate on the server
+                    API.activateWorkflow(value).then(() => {
+                        model.deserializeModel(diagramData.current, engine);
+                        setTimeout(() => engine.repaintCanvas(), 100);
+                        getGlobalVars();
+                        getAvailableNodes();                                          
+                    });
                 }
             })
             .catch(err => window.location = `/`);
@@ -162,14 +165,13 @@ const Workspace = (props) => {
      */
     const handleSave = (flow_id) => {
         //save the flow file to server so we can start the supervisor process
-        API.saveToServer(model.serialize());
-
-            const json_data = JSON.stringify(model.serialize());
+        API.saveToServer(model.serialize()).then((value) => {
+            const json_data = JSON.stringify(value);
 
             if (flow_id && flow_id != 'new'){
                 const inputData = {
                     id: flow_id,
-                    name: JSON.parse(json_data)['id'],
+                    name: JSON.parse(json_data)['react']['id'],
                     description: 'flow-' + Math.random().toString(36).substring(7),
                     json_data
                 };
@@ -181,7 +183,7 @@ const Workspace = (props) => {
             }
             else {
                 const inputData = {
-                    name: JSON.parse(json_data)['id'],
+                    name: JSON.parse(json_data)['react']['id'],
                     description: 'flow-' + Math.random().toString(36).substring(7),
                     json_data
                 };
@@ -192,6 +194,7 @@ const Workspace = (props) => {
                         window.location = `/${data['Id']}`
                     });
             }
+        });
     };
 
     /**

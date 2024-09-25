@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     path('new', views.new_workflow, name='new workflow'),
     path('open', views.open_workflow, name='open workflow'),
+    path('activate', views.activate_workflow, name='activate workflow'),
     path('edit', views.edit_workflow, name='edit workflow'),
     path('save', views.save_workflow, name='save'),
     path('execute', views.execute_workflow, name='execute workflow'),

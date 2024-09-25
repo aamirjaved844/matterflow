@@ -484,7 +484,8 @@ class Workflow:
             with open(self.path(node_to_retrieve.data)) as f:
                 return json.load(f)
         except OSError as e:
-            raise WorkflowException('retrieve node data', str(e))
+            #instead of raising a WorkflowException('retrieve node data', str(e)) we will send back a readable error in the json
+            return {"error": "unable to load node data. try loading any inputs files and re-executing"}
         except TypeError:
             raise WorkflowException(
                 'retrieve node data',

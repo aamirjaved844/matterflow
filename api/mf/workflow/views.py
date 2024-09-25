@@ -37,6 +37,65 @@ def new_workflow(request):
     except (json.JSONDecodeError, KeyError) as e:
         return JsonResponse({'No React model ID provided': str(e)}, status=500)
 
+@swagger_auto_schema(method='post',
+                     operation_summary='Activates a workflow from db.',
+                     operation_description='Loads a JSON file from db and translates into Workflow object and JSON object of front-end',
+                     responses={
+                         200: 'Workflow representation in JSON',
+                         400: 'No file specified',
+                         404: 'File specified not found or not JSON graph'
+                     })
+@api_view(['POST'])
+def activate_workflow(request):
+    """Activates a workflow.
+
+    User changes flow and passes JSON data to be
+    parsed and validated on the back-end.
+
+    Args:
+        request: Django request Object, should follow the pattern:
+            {
+                react: {react-diagrams JSON},
+                matterflow: {
+                    name: Workflow name,
+                    root_dir: File storage,
+                    graph: Computational graph,
+                    flow_vars: Global flow variables,
+                },
+            }
+
+    Raises:
+        JSONDecodeError: invalid JSON data
+        KeyError: request missing either 'react' or 'matterflow' data
+        WorkflowException: error loading JSON into NetworkX DiGraph
+
+    Returns:
+        200 - JSON response with data.
+        400 - No file specified
+        404 - File specified not found, or not JSON graph
+        500 - Missing JSON data or
+    """
+    
+    try:
+        # TODO: file is parsed into JSON in memory;
+        #       may want to save to 'fs' for large files
+        #if we have a file upload
+        uploaded_json = request.body
+        flow_json_string = json.loads(uploaded_json)['data']['json_data']
+        combined_json = json.loads(flow_json_string)
+        request.matterflow = Workflow.from_json(combined_json['matterflow'])
+        request.session.update(request.matterflow.to_session_dict())
+
+        # Send back front-end workflow
+        return JsonResponse(combined_json)
+    except KeyError as e:
+        return JsonResponse({'open_workflow': 'Missing data for ' + str(e)}, status=500)
+    except json.JSONDecodeError as e:
+        return JsonResponse({'No React JSON provided': str(e)}, status=500)
+    except WorkflowException as e:
+        return JsonResponse({e.action: e.reason}, status=404)
+
+
 
 @swagger_auto_schema(method='post',
                      operation_summary='Open workflow from file.',
@@ -76,9 +135,11 @@ def open_workflow(request):
         404 - File specified not found, or not JSON graph
         500 - Missing JSON data or
     """
+    
     try:
         # TODO: file is parsed into JSON in memory;
         #       may want to save to 'fs' for large files
+        #if we have a file upload
         uploaded_file = request.FILES.get('file')
         combined_json = json.load(uploaded_file)
 

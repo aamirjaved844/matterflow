@@ -474,7 +474,7 @@ export async function updateNode(node, config, flowConfig) {
 * Save front-end workflow and download server response as JSON file
 * @param {Object} diagramData - serialized react-diagrams model
 */
-export async function save(diagramData) {
+export async function save(diagramData, download=true) {
   const payload = JSON.stringify(diagramData);
   const options = {
       method: "POST",
@@ -482,8 +482,7 @@ export async function save(diagramData) {
   };
   fetchWrapper("/workflow/save", options)
       .then(json => {
-          downloadFile(JSON.stringify(json), "application/json",
-              json.filename || "diagram.json")
+          if (download){downloadFile(JSON.stringify(json), "application/json", json.filename || "diagram.json")}
       }).catch(err => console.log(err));
 }
 
@@ -500,10 +499,7 @@ export async function saveToServer(diagramData) {
       method: "POST",
       body: payload
   };
-  fetchWrapper("/workflow/savetoserver", options)
-      .then(json => {
-          console.log(json);
-      }).catch(err => console.log(err));
+  return fetchWrapper("/workflow/savetoserver", options)
 }
 
 /**
@@ -549,6 +545,19 @@ export async function initWorkflow(model) {
   return fetchWrapper("/workflow/new", options);
 }
 
+
+/**
+* Activates JSON workflow file on server
+* @param {Object} jsonData - json data
+* @returns {Promise<Object>} - server response (full serialized workflow)
+*/
+export async function activateWorkflow(jsonData) {
+  const options = {
+      method: "POST",
+      body: JSON.stringify(jsonData)
+  };
+  return fetchWrapper("/workflow/activate", options);
+}
 
 /**
 * Uploads JSON workflow file to server
