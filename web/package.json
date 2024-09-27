@@ -9,7 +9,7 @@
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"    
+    "build-storybook": "storybook build"
   },
   "dependencies": {
     "@emotion/react": "^11.11.4",
@@ -20,6 +20,7 @@
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@projectstorm/react-diagrams": "^7.0.4",
     "@tremor/react": "^3.17.4",
+    "antd": "^5.21.1",
     "bootstrap": "^5.3.3",
     "humanize-string": "^3.0.0",
     "jmespath": "^0.16.0",
