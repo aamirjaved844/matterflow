@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as jmespath from 'jmespath';
+import NodeDataExplorer from './NodeDataExplorer';
 
 const JMESPathTester = () => {
   const [expression, setExpression] = useState('[?node_id == `1`].attributes."0"."40"."1"');
@@ -29,6 +30,10 @@ const JMESPathTester = () => {
       };
       reader.readAsText(file);
     }
+  };
+
+  const handleNodeDataSelected = (jsonObject) => {
+      setJsonData(JSON.stringify(jsonObject));
   };
 
   return (
@@ -64,6 +69,7 @@ const JMESPathTester = () => {
         />
         <div className='flex'>
           <input type="file" id="json-file-input" accept=".json" onChange={handleFileUpload} />
+          <NodeDataExplorer handleNodeData={handleNodeDataSelected}/>
         </div>
       </form>
       <div className="jmes-result">

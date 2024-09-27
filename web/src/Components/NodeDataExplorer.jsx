@@ -1,106 +1,114 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as API from '../API';
-import { ButtonGroup, Dropdown, DropdownButton } from 'react-bootstrap';
+import { Dropdown, NavDropdown } from 'react-bootstrap';
 
-const DropdownMenu = ({ depthLevel, isSubmenu, menuItems, title }) => {
+const useFetch = () => {
 
-
-    return (
-        <DropdownButton
-            as={ButtonGroup}
-            drop={'end'}
-            variant={'success'}
-            title={title}
-          >
-            {
-              menuItems.map((menuItem, index) => {
-                if (menuItem.submenu && menuItem.submenu.length > 0) {
-                  return <div key={`${depthLevel}_${index}`} className='subMenuLevel'>
-                    <DropdownMenu depthLevel={depthLevel+1} title={menuItem.title} menuItems={menuItem.submenu} isSubmenu={true} />
-                  </div>
-                } else {
-                  return <Dropdown.Item key={`${depthLevel}_${index}`} eventKey={`${depthLevel}_${index}`} onClick={() => {if(menuItem.action) {menuItem.action(menuItem)}}}>{menuItem.title}</Dropdown.Item>
-                }
-              })
+    const [nodes, setNodes] = useState({
+        "title": "GetNodeData",
+        "items": []
+    });
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+  
+    const fetchData = async () => {
+      try {
+        API.getFlows().then((value) => {
+            var new_nodes = {
+                "title": "GetNodeData",
+                "items": []
             }
-          </DropdownButton>
-      )    
+            for (let i = 0; i < value.data.length; i++) {
+                var matterflow = JSON.parse(value.data[i]["json_data"])['matterflow'];
+                
+                var flow = {
+                    "label": matterflow['name'],
+                    "items": []
+                }
+    
+                try {
+                    var nodes = matterflow['graph']['nodes'];
+                    for (let j = 0; j < nodes.length; j++) {
+                        var node = nodes[j];
+                        flow.items.push({
+                            "label": node['name'],
+                            "node_id": node['node_id']
+                        })
+                    }
+                    new_nodes.items.push(flow)
+                } catch (error) {
+                    console.log(error)
+                }
 
+            }
+            setNodes(new_nodes);            
+        });
+            
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetchData();
+    }, []);
+  
+    return { nodes, loading, error};
 }
 
-const NodeDataExplorer = () => {
-    const depthLevel = 0
-    const isSubmenu = false 
-    const title = "Node Data Explorer"; // title
-    const menuItems = [
-        {
-        "title": "Option 1",
-        "submenu": null,
-        "action": (itemClicked) => {
-            alert('Clicked Option 1')
-            }
-        },
-        {
-        "title": <span style={{color: 'red'}}>Option 2</span>,
-        "submenu": [
-            {
-            "title": <span style={{width: '130px', fontWeight: 'bold'}}>&nbsp;Please add me</span>,
-            "submenu": [
-                {
-                "title": "Option 2.1.1",
-                "submenu": null,
-                "action": (itemClicked) => {
-                    alert("Clicked Option 2.1.1")
-                }
-                },
-                {
-                "title": "Option 2.1.2",
-                "submenu": [
-                    {
-                    "title": "Option 2.1.2.1",
-                    "submenu": null
-                    },
-                    {
-                    "title": "Option 2.1.2.2",
-                    "submenu": null
-                    }
-                ]
-                }
-            ]
-            },
-            {
-            "title": "Option 2.2",
-            "submenu": [
-                {
-                "title": "Option 2.2.1",
-                "submenu": null
-                },
-                {
-                "title": "Option 2.2.2",
-                "submenu": null
-                }
-            ]
-            }
-        ]
-        }
-    ];
+const handleNodeSelect = (handleNodeData, nodeId) => {
+    API.retrieveData(nodeId).then((value) => {
+        handleNodeData(value);
+    });
+};
 
-    const handleWorkflowQuery = (event) => {
-        API.getFlows().then((value) => {
-//            document.getElementById("flows").innerHTML = JSON.stringify(value, null, 2);
-            for (let i = 0; i < value.data.length; i++) {
-                alert(JSON.stringify(value.data[i]));
+const NodeDataExplorer = ({ handleNodeData }) => {
+    const { nodes, loading, error} = useFetch();
+
+
+    const MultiLevelDropdown = ({ config }) => {
+  
+        // Recursive function to render the menu items from the JSON structure
+        const renderMenuItems = (items) => {
+          return items.map((item, index) => {
+            if (item.items) {
+              // Render a dropdown if there are nested items
+              return (
+                <NavDropdown
+                  key={index}
+                  title={item.label}
+                  id={`dropdown-${item.label}`}
+                >
+                  {renderMenuItems(item.items)}
+                </NavDropdown>
+              );
             }
-        });
-    }
+            return (
+              <Dropdown.Item key={index} onClick={() => handleNodeSelect(handleNodeData, item.node_id)}>
+                {item.label}
+              </Dropdown.Item>
+            );
+          });
+        };
+      
+        return (
+          <Dropdown>
+            <Dropdown.Toggle variant="success" id="dropdown-basic">
+              {config.title}
+            </Dropdown.Toggle>
+      
+            <Dropdown.Menu>
+              {renderMenuItems(config.items)}
+            </Dropdown.Menu>
+          </Dropdown>
+        );
+      };
+
 
     return (
-        <>
-                    <DropdownMenu depthLevel={depthLevel+1} title={title} menuItems={menuItems} isSubmenu={isSubmenu} />
-                    <div className='flex'>
-                <div onClick={handleWorkflowQuery}>Get Node Data</div>                
-            </div>
-        </>
+        <MultiLevelDropdown config={nodes} />                
     )
 
 };
