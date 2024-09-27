@@ -5,7 +5,8 @@ import * as _ from "lodash";
 import * as API from "../../API";
 import "../../styles/NodeConfig.css";
 import OptionInput from "./OptionInput";
-import { Button as AntdButton } from "antd";
+import { Modal as AntdModal } from "antd";
+const { confirm } = AntdModal;
 
 export default class NodeConfig extends React.Component {
   constructor(props) {
@@ -56,10 +57,17 @@ export default class NodeConfig extends React.Component {
 
   // confirm, fire delete callback, close modal
   handleDelete() {
-    if (window.confirm("Are you sure you want to delete this node?")) {
-      this.props.onDelete();
-      this.props.toggleShow();
-    }
+    const self = this;
+    confirm({
+      title: "Are you sure you want to delete this node?",
+      okButtonProps: {
+        danger: true,
+      },
+      onOk() {
+        self.props.onDelete();
+        self.props.toggleShow();
+      },
+    });
   }
 
   // collect config data, fire submit callback, close modal
@@ -121,17 +129,19 @@ export default class NodeConfig extends React.Component {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer>
-            <AntdButton
-              type="primary"
+            <Button
+              variant="success"
               disabled={this.props.disabled}
-              htmlType="submit"
+              type="submit"
             >
               Save
-            </AntdButton>
-            <AntdButton onClick={this.props.toggleShow}>Cancel</AntdButton>
-            <AntdButton danger onClick={this.handleDelete}>
+            </Button>
+            <Button variant="secondary" onClick={this.props.toggleShow}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={this.handleDelete}>
               Delete
-            </AntdButton>
+            </Button>
           </Modal.Footer>
         </Form>
       </Modal>
