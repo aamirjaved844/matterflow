@@ -1,11 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import * as jmespath from 'jmespath';
-import NodeDataExplorer from './NodeDataExplorer';
+import React, { useState, useEffect } from "react";
+import * as jmespath from "jmespath";
+import NodeDataExplorer from "./NodeDataExplorer";
+import { DragOutlined } from "@ant-design/icons";
 
 const JMESPathTester = () => {
-  const [expression, setExpression] = useState('[?node_id == `1`].attributes."0"."40"."1"');
+  const [expression, setExpression] = useState(
+    '[?node_id == `1`].attributes."0"."40"."1"'
+  );
   const [jsonData, setJsonData] = useState();
-  const [result, setResult] = useState('');
+  const [result, setResult] = useState("");
 
   useEffect(() => {
     evaluateJMESPath();
@@ -33,33 +36,39 @@ const JMESPathTester = () => {
   };
 
   const handleNodeDataSelected = (jsonObject) => {
-      setJsonData(JSON.stringify(jsonObject));
+    setJsonData(JSON.stringify(jsonObject));
   };
 
   return (
     <div>
       <form>
         <div className="jmes-express">
-          <h3><strong>Test JMESPath Expression</strong></h3>
-          <div className='flex'>
-          <div
+          <h3>
+            <strong>Test JMESPath Expression</strong>
+          </h3>
+          <div className="flex">
+            <div
               draggable="true"
               onDragStart={(e) => {
-                e.dataTransfer.setData('text', expression);
-              }}>
-                drag
-            </div>             
-          <textarea
-            placeholder="Expression"
-            className="form-control jmespath-expression"
-            rows="1"
-            value={expression}
-            onChange={(e) => setExpression(e.target.value)}
-          />
+                e.dataTransfer.setData("text", expression);
+              }}
+            >
+              <DragOutlined
+                style={{ height: 40, width: 22, fontSize: 20, color: "grey" }}
+              />
+            </div>
+            <textarea
+              placeholder="Expression"
+              className="form-control jmespath-expression"
+              rows="1"
+              value={expression}
+              onChange={(e) => setExpression(e.target.value)}
+            />
           </div>
-       
         </div>
-        <h3><strong>Sample JSON</strong></h3>
+        <h3>
+          <strong>Sample JSON</strong>
+        </h3>
         <textarea
           placeholder='{"key":"value"}'
           className="form-control jmespath-input"
@@ -67,13 +76,20 @@ const JMESPathTester = () => {
           value={jsonData}
           onChange={(e) => setJsonData(e.target.value)}
         />
-        <div className='flex'>
-          <input type="file" id="json-file-input" accept=".json" onChange={handleFileUpload} />
-          <NodeDataExplorer handleNodeData={handleNodeDataSelected}/>
+        <div className="flex">
+          <input
+            type="file"
+            id="json-file-input"
+            accept=".json"
+            onChange={handleFileUpload}
+          />
+          <NodeDataExplorer handleNodeData={handleNodeDataSelected} />
         </div>
       </form>
       <div className="jmes-result">
-        <h3><strong>Result</strong></h3>
+        <h3>
+          <strong>Result</strong>
+        </h3>
         <pre className="jmespath-result">{result}</pre>
       </div>
     </div>

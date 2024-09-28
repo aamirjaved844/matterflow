@@ -1,29 +1,23 @@
-import React, { useState } from "react";
-import { Modal, Button } from "react-bootstrap";
+import { Modal as AntdModal, Divider } from "antd";
+import React from "react";
 import InstanceEditor from "./InstanceEditor";
 
 const InstanceModal = ({ show, handleClose, instanceName, instanceId }) => {
   return (
-    <Modal
-      show={show}
-      onHide={handleClose}
-      fullscreen
-      aria-labelledby="contained-modal-title-vcenter"
+    <AntdModal
+      open={show}
+      onClose={handleClose}
+      onCancel={handleClose}
       centered
+      title={instanceName}
+      footer={null}
+      width={"80%"}
     >
-      <Modal.Header>
-        <Modal.Title>{instanceName}</Modal.Title>
-        <Button variant="outline-danger" onClick={handleClose}>
-          X
-        </Button>
-      </Modal.Header>
-      <Modal.Body>
-        {/* Insert your form or content here */}
-        <div className='w-full'>
-        <InstanceEditor instance_id={instanceId} handleClose={handleClose}/>
-        </div>
-      </Modal.Body>
-    </Modal>
+      <div className="w-full">
+        <Divider />
+        <InstanceEditor instance_id={instanceId} handleClose={handleClose} />
+      </div>
+    </AntdModal>
   );
 };
 
