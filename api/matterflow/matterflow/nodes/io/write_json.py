@@ -20,7 +20,7 @@ class WriteJsonNode(IONode):
     OPTIONS = {
         "file": StringParameter(
             "Filename",
-            docstring="CSV file to write"
+            docstring="Json file to write"
         ),
         "write_mode": SelectParameter(
             "Write Mode",

@@ -26,6 +26,7 @@ aiohttp = "*"
 websocket-client = "*"
 websockets = "*"
 jmespath = "*"
+boto3 = "*"
 
 [requires]
 python_version = "3.12"

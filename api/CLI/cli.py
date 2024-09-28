@@ -3,7 +3,7 @@ import json
 
 from matterflow import Workflow, WorkflowException
 from matterflow import NodeException
-from matterflow.nodes import ReadCsvNode, WriteCsvNode, ReadJsonNode, WriteJsonNode, WsConnectionNode
+from matterflow.nodes import ReadCsvNode, WriteCsvNode, ReadJsonNode, WriteJsonNode, WsConnectionNode, WriteJsonToS3Node
 
 class Config(object):
     def __init__(self):
@@ -87,7 +87,8 @@ def pre_execute(workflow, node_to_execute, log):
     """Pre-execution steps, to overwrite file options with stdin/stdout.
 
     If stdin is not a tty, and the Node is ReadCsv or ReadJson, replace file with buffer.
-    If stdout is not a tty, and the Node is WriteCsv or WriteJson, replace file with buffer.
+    If stdout is not a tty, and the Node is WriteCsv or WriteJson or WriteJsonToS3, 
+    replace file with buffer.
 
     Args:
         workflow - Workflow object loaded from file
@@ -103,6 +104,8 @@ def pre_execute(workflow, node_to_execute, log):
     elif type(node_to_execute) is ReadJsonNode and not stdin.isatty():
         new_file_location = stdin
     elif type(node_to_execute) is WriteJsonNode and not log:
+        new_file_location = click.get_text_stream('stdout')
+    elif type(node_to_execute) is WriteJsonToS3Node and not log:
         new_file_location = click.get_text_stream('stdout')
     elif type(node_to_execute) is WsConnectionNode and not stdin.isatty():
         new_file_location = stdin

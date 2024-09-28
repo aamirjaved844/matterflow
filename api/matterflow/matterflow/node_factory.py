@@ -10,6 +10,8 @@ def node_factory(node_info):
 
     if node_type == 'io':
         new_node = io_node(node_key, node_info)
+    elif node_type == 'cloud':
+        new_node = cloud_node(node_key, node_info)
     elif node_type == 'manipulation':
         new_node = manipulation_node(node_key, node_info)
     elif node_type == 'flow_control':
@@ -73,6 +75,12 @@ def manipulation_node(node_key, node_info):
 def visualization_node(node_key, node_info):
     if node_key == 'GraphNode':
         return GraphNode(node_info)
+    else:
+        return None
+
+def cloud_node(node_key, node_info):
+    if node_key == 'WriteJsonToS3Node':
+        return WriteJsonToS3Node(node_info)
     else:
         return None
 
