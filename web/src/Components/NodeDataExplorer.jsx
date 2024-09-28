@@ -88,7 +88,7 @@ const NodeDataExplorer = ({ handleNodeData }) => {
         },
       }}
     >
-      <Button type="primary">
+      <Button type="primary" style={{ width: "fit-content" }}>
         {nodes.title} <DownOutlined />
       </Button>
     </AntdDropdown>
