@@ -11,7 +11,7 @@ const InstanceModal = ({ show, handleClose, instanceName, instanceId }) => {
       centered
       title={instanceName}
       footer={null}
-      width={"80%"}
+      width={"90%"}
     >
       <div className="w-full">
         <Divider />

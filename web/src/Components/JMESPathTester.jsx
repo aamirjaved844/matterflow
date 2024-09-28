@@ -76,7 +76,7 @@ const JMESPathTester = () => {
           value={jsonData}
           onChange={(e) => setJsonData(e.target.value)}
         />
-        <div className="flex">
+        <div className="flex" style={{ flexDirection: "column", gap: 8 }}>
           <input
             type="file"
             id="json-file-input"
