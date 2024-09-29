@@ -87,22 +87,31 @@ class WriteJsonToS3Node(IONode):
             # Upload the JSON from the buffer to S3
             file_name = flow_vars["filename"].get_value()
 
-            if flow_vars["write_mode"].get_value() == 'overwrite':
-                s3_resource.Object(bucket, file_name).put(Body=json_buffer.getvalue())
-            else:
-                try:
-                    # Try to read the existing file from S3
-                    obj = s3_resource.meta.client.get_object(Bucket=bucket, Key=file_name)
-                    existing_data = obj['Body'].read().decode('utf-8')
-                    # Append the new data to the existing data
-                    updated_data = existing_data + '\n' + json_buffer.getvalue()
-                except Exception as e:
-                    print(e)
-                    # If the file doesn't exist, create a new one with the current data
-                    updated_data = json_buffer.getvalue()
-                
-                # Put the updated data back into S3
-                s3_resource.Object(bucket, file_name).put(Body=updated_data)
+            try:
+                if flow_vars["write_mode"].get_value() == 'overwrite':
+                    s3_resource.Object(bucket, file_name).put(Body=json_buffer.getvalue())
+                else:
+                    try:
+                        # Try to read the existing file from S3
+                        obj = s3_resource.meta.client.get_object(Bucket=bucket, Key=file_name)
+                        existing_data = obj['Body'].read().decode('utf-8')
+                        # Append the new data to the existing data
+                        updated_data = existing_data + '\n' + json_buffer.getvalue()
+                    except Exception as e:
+                        if (e.operation_name == 'GetObject'):
+                            if (e.response['Error']['Code'] == 'NoSuchKey'):
+                                # If the file doesn't exist, create a new one with the current data
+                                updated_data = json_buffer.getvalue()
+                            else:
+                                json_string = '{"error":"aws s3 error - check your credentials, bucket and filename"}'
+                        else:
+                            json_string = '{"error":"aws s3 error - check your credentials, bucket and filename"}'
+                    
+                    # Put the updated data back into S3
+                    s3_resource.Object(bucket, file_name).put(Body=updated_data)
+
+            except Exception as e:
+                json_string = '{"error":"aws s3 error - check your credentials, bucket and filename"}'
 
             return json_string
 
