@@ -77,7 +77,7 @@ const InstanceEditor = (params) => {
     setDirty(true);
     console.log(event.target.name);
     const dropValue = event.dataTransfer
-      .getData("field_inner_html")
+      .getData("text")
       .replace(/(<([^>]+)>)/gi, "");
 
     const values = [...inputFields];
