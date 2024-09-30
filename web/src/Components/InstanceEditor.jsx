@@ -74,6 +74,7 @@ const InstanceEditor = (params) => {
   };
 
   const handleDrop = (index, event) => {
+    event.preventDefault(); //stop the drop event being doubled called
     setDirty(true);
     console.log(event.target.name);
     const dropValue = event.dataTransfer
