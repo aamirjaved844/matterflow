@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import * as _ from "lodash";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import CustomNodeUpload from "./CustomNodeUpload";
@@ -7,6 +7,11 @@ import { Collapse, Input } from "antd";
 const CUSTOM_NODES_SECTION = "Custom Nodes";
 export default function NodeMenu(props) {
   const [searchText, setSearchText] = useState("");
+  const [activeKeys, setActiveKeys] = useState([]);
+
+  useEffect(() => {
+    setActiveKeys(_.map(props.nodes, (items, section) => section));
+  }, [props.nodes]);
 
   // construct menu from JSON of node types
   const filteredSections = [CUSTOM_NODES_SECTION];
@@ -59,10 +64,11 @@ export default function NodeMenu(props) {
         style={{ marginTop: 16 }}
       />
       <Collapse
-        accordion
         items={menuItems}
         bordered={false}
         ghost
+        activeKey={activeKeys}
+        onChange={setActiveKeys}
         style={{ margin: "16px -16px" }}
       />
     </div>
