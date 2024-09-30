@@ -1,12 +1,15 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import * as _ from "lodash";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
 import CustomNodeUpload from "./CustomNodeUpload";
-import { Collapse } from "antd";
+import { Collapse, Input } from "antd";
 
+const CUSTOM_NODES_SECTION = "Custom Nodes";
 export default function NodeMenu(props) {
-  // construct menu from JSON of node types
+  const [searchText, setSearchText] = useState("");
 
+  // construct menu from JSON of node types
+  const filteredSections = [CUSTOM_NODES_SECTION];
   const menuItems = _.map(props.nodes, (items, section) => {
     return {
       key: section,
@@ -17,15 +20,24 @@ export default function NodeMenu(props) {
             const data = { ...item }; // copy so we can mutate
             const config = data.options;
             delete data.options;
-            return (
-              <NodeMenuItem
-                key={data.node_key || data.filename}
-                nodeInfo={data}
-                config={config}
-              />
-            );
+            if (
+              String(data?.name ?? "")
+                .toLowerCase()
+                ?.includes(searchText.toLowerCase())
+            ) {
+              filteredSections.push(section);
+              return (
+                <NodeMenuItem
+                  key={data.node_key || data.filename}
+                  nodeInfo={data}
+                  config={config}
+                />
+              );
+            } else {
+              <></>;
+            }
           })}
-          {section === "Custom Nodes" ? (
+          {section === CUSTOM_NODES_SECTION ? (
             <CustomNodeUpload onUpload={props.onUpload} />
           ) : (
             <></>
@@ -33,12 +45,19 @@ export default function NodeMenu(props) {
         </ul>
       ),
     };
-  });
+  }).filter((item) => filteredSections.includes(item.label));
 
   return (
     <div className="NodeMenu">
       <h3>Node Menu</h3>
       <div>Drag-and-drop nodes to build a data workflow.</div>
+      <Input.Search
+        placeholder="Search..."
+        onChange={(e) => {
+          setSearchText(e.target.value);
+        }}
+        style={{ marginTop: 16 }}
+      />
       <Collapse
         accordion
         items={menuItems}
