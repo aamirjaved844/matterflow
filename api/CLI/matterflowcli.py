@@ -36,6 +36,49 @@ async def useWsConnectionForReading(filenames, verbose, websocket_connection_set
         await execute_async(filenames, verbose)
         await asyncio.sleep(0.1)
 
+async def usePeriodicTask(filenames, verbose, interval=5):
+    """This task runs periodically every `0.1` seconds."""
+    while True:
+        # Your periodic action here
+        print("Periodic task is running...")
+        await execute_async(filenames, verbose)
+        
+        # Sleep for the specified interval before running again
+        await asyncio.sleep(interval)
+
+async def run_all_periodic_flows(filenames, verbose, interval=5):
+
+    """ Start concurrent tasks and join  together """
+    print("Begin to start tasks...")
+
+    async with asyncio.TaskGroup() as tasks:
+
+        # Execute each workflow in the args
+        for workflow_file in filenames:
+
+            if workflow_file is None:
+                click.echo('Please specify a workflow to run', err=True)
+                return
+
+            try:
+                workflow = open_workflow(workflow_file)
+                execution_order = workflow.execution_order()
+                node_to_execute = workflow.get_node(execution_order[0])
+
+                ##create the periodic task
+                tasks.create_task(usePeriodicTask(filenames, verbose, interval))  # Runs every 5 seconds
+
+            except OSError as e:
+                click.echo(f"Issues loading workflow file: {e}", err=True)
+            except WorkflowException as e:
+                click.echo(f"Issues during workflow execution\n{e}", err=True)
+
+    results = []
+
+    print(f"All periodic flows done")
+
+    return results
+
 async def run_all_ws_flows(filenames, verbose):
     # Example usage "WS"
     connection_settings = {
@@ -102,11 +145,18 @@ def event():
     pass
 
 
+# You can run this program with 
+# matterflow execute /tmp/ae5727c6-c9c9-4b0e-adf1-46b34dd870d9.json --verbose (for websocket initiated flows)
+# matterflow execute /tmp/ae5727c6-c9c9-4b0e-adf1-46b34dd870d9.json --verbose --interval 5 (for periodic initiated flows e.g. 5 secs)
 @event.command()
 @click.argument('filenames', type=click.Path(exists=True), nargs=-1)
 @click.option('--verbose', is_flag=True, help='Enables verbose mode.')
-def execute(filenames, verbose):
-    asyncio.run(run_all_ws_flows(filenames, verbose))
+@click.option('--interval', default=0)
+def execute(filenames, verbose, interval):
+    if (interval > 0):
+        asyncio.run(run_all_periodic_flows(filenames, verbose, interval=5))
+    else:
+        asyncio.run(run_all_ws_flows(filenames, verbose))
 
 
 async def execute_async(filenames, verbose):
