@@ -1,20 +1,19 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Row, Col, Button, Offcanvas } from "react-bootstrap";
-import createEngine, { DiagramModel } from "@projectstorm/react-diagrams";
+import { CloseCircleFilled } from "@ant-design/icons";
 import { CanvasWidget } from "@projectstorm/react-canvas-core";
-import MFLinkFactory from "./MFLink/MFLinkFactory";
-import CustomNodeModel from "./CustomNode/CustomNodeModel";
-import CustomNodeFactory from "./CustomNode/CustomNodeFactory";
-import MFPortFactory from "./MFPort/MFPortFactory";
+import createEngine, { DiagramModel } from "@projectstorm/react-diagrams";
+import { Button as AntdButton, Modal as AntdModal } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Col, Offcanvas, Row } from "react-bootstrap";
 import * as API from "../API";
-import NodeMenu from "./NodeMenu";
-import FlowMenu from "./FlowMenu";
-import ModelMenu from "./ModelMenu";
 import "../styles/Workspace.css";
+import CustomNodeFactory from "./CustomNode/CustomNodeFactory";
+import CustomNodeModel from "./CustomNode/CustomNodeModel";
+import FlowMenu from "./FlowMenu";
 import GlobalFlowMenu from "./GlobalFlowMenu";
-import DialogConfirmation from "./DialogConfirmation";
-import { useNavigate } from "react-router-dom";
-import { Modal as AntdModal } from "antd";
+import MFLinkFactory from "./MFLink/MFLinkFactory";
+import MFPortFactory from "./MFPort/MFPortFactory";
+import ModelMenu from "./ModelMenu";
+import NodeMenu from "./NodeMenu";
 const { confirm } = AntdModal;
 
 /**
@@ -34,6 +33,8 @@ const Workspace = (props) => {
   //we can access the flow_id by using props.params.flow_id
 
   const diagramData = useRef(null);
+
+  const [showNodeMenu, setShowNodeMenu] = useState(true);
 
   //const navigate = useNavigate();
 
@@ -281,7 +282,7 @@ const Workspace = (props) => {
           />
           <ModelMenu models={models} onUpload={getAvailableModels} />
         </Col>
-        <Col xs={7} style={{ paddingLeft: 0 }}>
+        <Col xs={showNodeMenu ? 7 : 9} style={{ paddingLeft: 0 }}>
           <div
             style={{ position: "relative", flexGrow: 1 }}
             onDrop={handleNodeCreation}
@@ -305,16 +306,41 @@ const Workspace = (props) => {
             </Offcanvas>
           </div>
         </Col>
-        <Col xs={2}>
-          <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
-          <GlobalFlowMenu
-            menuItems={nodes["Flow Control"] || []}
-            nodes={globals}
-            onUpdate={getGlobalVars}
-            diagramModel={model}
-          />
-        </Col>
+        {showNodeMenu && (
+          <Col xs={2}>
+            <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
+            <GlobalFlowMenu
+              menuItems={nodes["Flow Control"] || []}
+              nodes={globals}
+              onUpdate={getGlobalVars}
+              diagramModel={model}
+            />
+          </Col>
+        )}
       </Row>
+      <div style={{ position: "absolute", top: 8, right: 12 }}>
+        <AntdButton
+          type="default"
+          size="sm"
+          onClick={() => {
+            setShowNodeMenu(true);
+          }}
+        >
+          Open Node Menu
+        </AntdButton>
+      </div>
+      {showNodeMenu && (
+        <div style={{ position: "absolute", top: 44, right: 14 }}>
+          <AntdButton
+            type="text"
+            size="sm"
+            icon=<CloseCircleFilled />
+            onClick={() => {
+              setShowNodeMenu(false);
+            }}
+          ></AntdButton>
+        </div>
+      )}
     </>
   );
 };
