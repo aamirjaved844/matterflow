@@ -238,39 +238,6 @@ const Workspace = (props) => {
 
   return (
     <>
-      <Row className="mb-3">
-        <Col md={12}>
-          <Button
-            size="sm"
-            onClick={() => {
-              alert(JSON.stringify(model.serialize()));
-            }}
-          >
-            ShowData
-          </Button>{" "}
-          <Button
-            size="sm"
-            onClick={() => {
-              API.save(model.serialize());
-            }}
-          >
-            Export
-          </Button>{" "}
-          <FileUpload handleData={load} />{" "}
-          <Button size="sm" onClick={clear}>
-            Clear
-          </Button>{" "}
-          <Button size="sm" onClick={execute}>
-            Execute
-          </Button>{" "}
-          <Button size="sm" onClick={handleShow}>
-            Console
-          </Button>
-          <Button size="sm" onClick={() => handleSave(flow_id)}>
-            Save
-          </Button>
-        </Col>
-      </Row>
       <Row className="Workspace">
         <Col xs={3}>
           <FlowMenu
@@ -282,12 +249,48 @@ const Workspace = (props) => {
           />
           <ModelMenu models={models} onUpload={getAvailableModels} />
         </Col>
-        <Col xs={showNodeMenu ? 7 : 9} style={{ paddingLeft: 0 }}>
+        <Col
+          xs={showNodeMenu ? 7 : 9}
+          style={{ paddingLeft: 0, marginTop: 24 }}
+        >
           <div
             style={{ position: "relative", flexGrow: 1 }}
             onDrop={handleNodeCreation}
             onDragOver={(event) => event.preventDefault()}
           >
+            <div style={{ position: "relative", zIndex: 100, maxWidth: "70%" }}>
+              <div style={{ position: "absolute", top: 8, left: 8 }}>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    alert(JSON.stringify(model.serialize()));
+                  }}
+                >
+                  ShowData
+                </Button>{" "}
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    API.save(model.serialize());
+                  }}
+                >
+                  Export
+                </Button>{" "}
+                <FileUpload handleData={load} />{" "}
+                <Button size="sm" onClick={clear}>
+                  Clear
+                </Button>{" "}
+                <Button size="sm" onClick={execute}>
+                  Execute
+                </Button>{" "}
+                <Button size="sm" onClick={handleShow}>
+                  Console
+                </Button>{" "}
+                <Button size="sm" onClick={() => handleSave(flow_id)}>
+                  Save
+                </Button>
+              </div>
+            </div>
             <CanvasWidget className="diagram-canvas" engine={engine} />
             <Offcanvas
               placement="bottom"
@@ -307,7 +310,7 @@ const Workspace = (props) => {
           </div>
         </Col>
         {showNodeMenu && (
-          <Col xs={2}>
+          <Col xs={2} style={{ marginTop: 24 }}>
             <NodeMenu nodes={nodes} onUpload={getAvailableNodes} />
             <GlobalFlowMenu
               menuItems={nodes["Flow Control"] || []}
@@ -318,19 +321,9 @@ const Workspace = (props) => {
           </Col>
         )}
       </Row>
-      <div style={{ position: "absolute", top: 8, right: 12 }}>
-        <AntdButton
-          type="default"
-          size="sm"
-          onClick={() => {
-            setShowNodeMenu(true);
-          }}
-        >
-          Open Node Menu
-        </AntdButton>
-      </div>
-      {showNodeMenu && (
-        <div style={{ position: "absolute", top: 44, right: 14 }}>
+
+      {showNodeMenu ? (
+        <div style={{ position: "absolute", top: 24, right: 14 }}>
           <AntdButton
             type="text"
             size="sm"
@@ -339,6 +332,18 @@ const Workspace = (props) => {
               setShowNodeMenu(false);
             }}
           ></AntdButton>
+        </div>
+      ) : (
+        <div style={{ position: "absolute", top: 32, right: 20 }}>
+          <AntdButton
+            type="default"
+            size="sm"
+            onClick={() => {
+              setShowNodeMenu(true);
+            }}
+          >
+            Open Node Menu
+          </AntdButton>
         </div>
       )}
     </>
