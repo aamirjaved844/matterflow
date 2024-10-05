@@ -7,7 +7,7 @@ import DialogConfirmation from "./DialogConfirmation";
 import { ListGroup, Button, InputGroup, FormControl } from "react-bootstrap";
 import StatusLight from "./StatusLight";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Modal as AntdModal } from "antd";
+import { Modal as AntdModal, Modal, Spin } from "antd";
 const { confirm } = AntdModal;
 
 const PROCESS_POLL_TIME = 10000; // 10 seconds
@@ -50,6 +50,8 @@ const FlowList = (props) => {
   const [processes, setProcesses] = useState([]);
   const [isPolling, setIsPolling] = useState(true);
   const [pollInterval, setPollInterval] = useState(PROCESS_POLL_TIME);
+  const [showProcessModal, setShowProcessModal] = useState(false);
+  const [loadingProcesses, setLoadingProcesses] = useState(false);
 
   useEffect(() => {
     const pollProcesses = async () => {
@@ -156,11 +158,6 @@ const FlowList = (props) => {
     } else {
       props.onNewFlow();
     }
-  };
-
-  // Handler to add a new flow and make it bold
-  const handleViewProcesses = () => {
-    window.open("http://127.0.0.1:9001/", "_blank").focus();
   };
 
   // Function to calculate flow process status
@@ -357,10 +354,33 @@ const FlowList = (props) => {
         <Button
           variant="primary"
           className="ms-2"
-          onClick={handleViewProcesses}
+          onClick={() => {
+            setShowProcessModal(true);
+            setLoadingProcesses(true);
+          }}
         >
           View Processes
         </Button>
+
+        <AntdModal
+          open={showProcessModal}
+          width={"90%"}
+          centered
+          footer={null}
+          onCancel={() => {
+            setShowProcessModal(false);
+          }}
+          destroyOnClose
+        >
+          {loadingProcesses && <Spin spinning />}
+          <iframe
+            src="http://127.0.0.1:9001/"
+            style={{ width: "100%", minHeight: "400px" }}
+            onLoad={() => {
+              setLoadingProcesses(false);
+            }}
+          />
+        </AntdModal>
       </div>
     </div>
   );
