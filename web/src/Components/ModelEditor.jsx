@@ -1,73 +1,82 @@
-import React from "react";
-import { Divider, TextInput, Select, SelectItem } from "@tremor/react";
-import { useState, useEffect } from "react";
-import * as API from "../API";
-import { Button } from "antd";
+import React, { useState, useEffect } from 'react';
+import { Divider, TextInput, Select, SelectItem } from '@tremor/react';
+import { Button } from 'antd';
+import * as API from '../API';
+
+const initialInputFields = [
+  {
+    fieldName: '',
+    fieldDatatype: 'String',  // Initial datatype is String
+    subInputFields: [],
+    fieldNameError: ''
+  }
+];
 
 const ModelEditor = (params) => {
+  const model_id = params?.model_id;
+  const [inputFields, setInputFields] = useState(initialInputFields);
+  const [hasModelId, setHasModelId] = useState(false);
+
   const fieldDatatypeOptions = [
     "String",
     "Number",
     "Boolean",
     "Object",
+    "Array",
     "Timestamp",
   ];
 
-  const [inputFields, setInputFields] = useState([
-    { fieldName: "", fieldDatatype: "Object", fieldNameError: "" },
-  ]);
-
-  const model_id = params?.model_id;
-  let hasModelId = false;
-
-  if (model_id != undefined) {
-    //only fetch data if we have a model id
-    const init = () => {
+  // Fetch data from API if model_id exists
+  const init = () => {
+    if (model_id !== undefined) {
+      setHasModelId(true);
       API.getModel(model_id)
         .then((res) => {
           console.log(res.data.json_data);
-          var json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
+          var json_data = JSON.parse(res.data.json_data);
           if (json_data.length === 0 || Object.keys(json_data).length === 0) {
             json_data = [
-              { fieldName: "", fieldDatatype: "Object", fieldNameError: "" },
+              { fieldName: '', fieldDatatype: 'Object', subInputFields: null, fieldNameError: '' },
             ];
           }
           setInputFields(json_data);
         })
         .catch((err) => console.log(err));
-    };
-    useEffect(() => {
-      init();
-    }, []);
-    hasModelId = true;
-  }
-
-  const handleClose = (handleCloseHandler) => {
-    //close the modal now
-    handleCloseHandler();
+    }
   };
 
-  const handleChangeInput = (index, event) => {
-    const exists = inputFields.find((p) => p.fieldName === event.target.value);
+  useEffect(() => {
+    init();
+  }, []);
 
-    const values = [...inputFields];
-    values[index][event.target.name] = event.target.value;
-    if (exists) {
-      values[index]["fieldNameError"] = "Field name already in use!";
+  const updateFieldDeep = (fields, indices, key, value) => {
+    if (indices.length === 1) {
+      fields[indices[0]][key] = value;
     } else {
-      values[index]["fieldNameError"] = "";
+      updateFieldDeep(fields[indices[0]].subInputFields, indices.slice(1), key, value);
+    }
+  };
+
+  const handleFieldNameChange = (indices, event) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields)); // Deep copy
+    updateFieldDeep(newInputFields, indices, 'fieldName', event.target.value);
+    setInputFields(newInputFields);
+  };
+
+  const handleDatatypeChange = (indices, event) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields)); // Deep copy
+    //const selectedType = event.target.value;
+    const selectedType = event;
+
+    updateFieldDeep(newInputFields, indices, 'fieldDatatype', selectedType);
+
+    // If type is "Object", initialize subInputFields if not already
+    const field = getFieldDeep(newInputFields, indices);
+    if (selectedType === 'Object' && (!field.subInputFields || field.subInputFields === null)) {
+      updateFieldDeep(newInputFields, indices, 'subInputFields', []);
     }
 
-    setInputFields(values);
-  };
-
-  const handleSelectChangeInput = (index, value) => {
-    console.log("handleSelectChangeInput");
-    console.log(index);
-    console.log(value);
-    const values = [...inputFields];
-    values[index]["fieldDatatype"] = value;
-    setInputFields(values);
+    setInputFields(newInputFields);
   };
 
   const handleSubmit = async (e) => {
@@ -102,7 +111,7 @@ const ModelEditor = (params) => {
     }
 
     const inputs = {
-      json_data: inputFields,
+      json_data: JSON.stringify(inputFields),
     };
 
     if (hasModelId) {
@@ -114,85 +123,160 @@ const ModelEditor = (params) => {
       const response = await API.addModel(inputs);
       console.log(response);
     }
-    //        navigate("/models");
   };
 
-  const handleAddFields = () => {
-    setInputFields([
-      ...inputFields,
-      { fieldName: "", fieldDatatype: "", fieldNameError: "" },
-    ]);
+  const handleClose = (handleCloseHandler) => {
+    //close the modal now
+    handleCloseHandler();
   };
 
-  const handleRemoveFields = (index) => {
-    const values = [...inputFields];
-    values.splice(index, 1);
-    setInputFields(values);
+  const getFieldDeep = (fields, indices) => {
+    if (indices.length === 1) {
+      return fields[indices[0]];
+    } else {
+      return getFieldDeep(fields[indices[0]].subInputFields, indices.slice(1));
+    }
   };
 
-  return (
-    <div className="ModelEditor">
+  const addFieldAtSameLevel = (parentIndices) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields)); // Deep copy
+    const parentField = parentIndices.length === 0 ? newInputFields : getFieldDeep(newInputFields, parentIndices);
+    
+    const newField = {
+      fieldName: '',
+      fieldDatatype: 'String',  // New fields default to "String"
+      subInputFields: null,
+      fieldNameError: ''
+    };
+
+    if (Array.isArray(parentField)) {
+      parentField.push(newField);  // Top-level addition
+    } else {
+      parentField.subInputFields.push(newField);  // Nested addition
+    }
+
+    setInputFields(newInputFields);
+  };
+
+  const addSubInputField = (indices) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields)); // Deep copy
+    const field = getFieldDeep(newInputFields, indices);
+
+    if (!field.subInputFields) {
+      field.subInputFields = [];
+    }
+
+    field.subInputFields.push({
+      fieldName: '',
+      fieldDatatype: 'String',  // Subfields default to "String"
+      subInputFields: null,
+      fieldNameError: ''
+    });
+
+    setInputFields(newInputFields);
+  };
+
+  const removeSubInputField = (indices) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields)); // Deep copy
+
+    if (indices.length === 1) {
+      newInputFields.splice(indices[0], 1);  // Remove top-level field
+    } else {
+      const parentField = getFieldDeep(newInputFields, indices.slice(0, -1));
+      parentField.subInputFields.splice(indices[indices.length - 1], 1);  // Remove nested subfield
+    }
+
+    setInputFields(newInputFields);
+  };
+
+  const renderInputFields = (fields, parentIndices = [], level = 0) => {
+    return (
       <div>
-        <h1>Create a Data Model</h1>
-        <div className="container mx-auto p-4">
-          <form
-            onSubmit={(event) => {
-              handleSubmit(event);
-              handleClose(params.handleClose);
-            }}
-            className="space-y-4"
-          >
-            {inputFields.map((inputField, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <TextInput
-                  name="fieldName"
-                  placeholder="Field Name"
-                  value={inputField.fieldName}
-                  onChange={(event) => handleChangeInput(index, event)}
-                  error={inputField.fieldNameError.length > 0}
-                  errorMessage={inputField.fieldNameError}
-                  className="form-input px-4 py-2 rounded border"
-                />
+        {fields.map((field, index) => {
+          const indices = [...parentIndices, index]; // Track path for recursion
 
+          return (
+            <div key={index} style={{ marginLeft: `${level * 20}px`, marginBottom: '10px', display: 'block' }} >
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                <TextInput
+                  value={field.fieldName}
+                  onChange={(e) => handleFieldNameChange(indices, e)}
+                  placeholder="Field Name"
+                  style={{ marginRight: '10px', flex: 1 }}
+                />
                 <Select
-                  name="fieldDatatype"
-                  placeholder="Field Data Type"
-                  value={inputField.fieldDatatype}
-                  onValueChange={(value) =>
-                    handleSelectChangeInput(index, value)
-                  }
-                  className="form-input px-4 py-2 rounded border"
+                  value={field.fieldDatatype}
+                  onChange={(e) => handleDatatypeChange(indices, e)}
+                  style={{ marginRight: '10px', flex: 1 }}
                 >
-                  {fieldDatatypeOptions.map((fieldDatatype, selectIndex) => (
-                    <SelectItem key={selectIndex} value={fieldDatatype}>
-                      {fieldDatatype}
-                    </SelectItem>
-                  ))}
+                {fieldDatatypeOptions.map((fieldDatatype, selectIndex) => (
+                <SelectItem key={selectIndex} value={fieldDatatype}>
+                  {fieldDatatype}
+                </SelectItem>
+                ))}                  
                 </Select>
+
+                {field.fieldDatatype === 'Object' && (
+                  <Button
+                    shape="circle"
+                    type="primary"
+                    onClick={() => addSubInputField(indices)}
+                    style={{ marginRight: '10px' }}
+                  >
+                    +
+                  </Button>
+                )}
+
                 <Button
                   danger
                   shape="circle"
                   type="primary"
-                  onClick={() => handleRemoveFields(index)}
+                  onClick={() => removeSubInputField(indices)}
+                  style={{ marginRight: '10px' }}
                 >
                   -
                 </Button>
-                <Button
-                  shape="circle"
-                  type="primary"
-                  onClick={() => handleAddFields()}
-                >
-                  +
-                </Button>
               </div>
-            ))}
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </form>
-        </div>
+
+              {/* Render subInputFields if available */}
+              {Array.isArray(field.subInputFields) && (
+                <div style={{ marginTop: '10px' }}>
+                  {renderInputFields(field.subInputFields, indices, level + 1)}
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Button to add a field at the same level */}
+        {level === 0 && (
+        <Button
+        type="default"
+        size="sm"
+        onClick={() => addFieldAtSameLevel(parentIndices)}
+        >
+        Add Top Level Field
+        </Button>
+        )} 
       </div>
-    </div>
+    );
+  };
+
+  return (
+    <form
+    onSubmit={(event) => {
+      handleSubmit(event);
+      handleClose(params.handleClose);
+    }}
+    className="space-y-4"
+  >
+      <>
+      {renderInputFields(inputFields)}
+      <Button type="primary" htmlType="submit">
+              Submit
+      </Button>      
+      </>
+    </form>
   );
 };
 

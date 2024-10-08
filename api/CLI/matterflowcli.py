@@ -2,7 +2,7 @@ import click
 import json
 from matterflow import Workflow, WorkflowException
 from matterflow import NodeException
-from matterflow.nodes import ReadCsvNode, WriteCsvNode, ReadJsonNode, WriteJsonNode, WsConnectionNode, WriteJsonToS3Node
+from matterflow.nodes import ReadCsvNode, WriteCsvNode, ReadJsonNode, WriteJsonNode, WsConnectionNode, WriteJsonToS3Node, BatchPutToSitewiseNode
 import asyncio
 import time
 import io
@@ -246,6 +246,9 @@ def pre_execute(workflow, node_to_execute, log):
         #this is important as we dont want to use stdin for files that are writing out to the file system
         return None
     elif type(node_to_execute) is WriteJsonToS3Node and not log:
+        #this is important as we dont want to use stdin for files that are writing out to the file system
+        return None
+    elif type(node_to_execute) is BatchPutToSitewiseNode and not log:
         #this is important as we dont want to use stdin for files that are writing out to the file system
         return None
     elif type(node_to_execute) is WsConnectionNode and not stdin.isatty():

@@ -63,10 +63,10 @@ Setup your local development environment:
 
 ```bash
 # Clone your fork
-git clone git@github.com:<username>/MatterCoder/matterflow.git
+git clone https://github.com/MatterCoder/matterflow.git
 
 # Configure upstream alias
-git remote add upstream git@github.com:MatterCoder/matterflow.git
+git remote add upstream https://github.com/MatterCoder/matterflow.git
 ```
 
 ### Submitting a Pull Request
