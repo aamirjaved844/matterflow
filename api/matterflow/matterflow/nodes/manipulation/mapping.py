@@ -25,7 +25,7 @@ def findMappedItems(searchString, predecessor_data):
 
     except Exception as e:
         print('mapping jmespath error', str(e))
-        return needle
+        return searchString
 
     return needle
 
@@ -66,6 +66,37 @@ def replaceCurlys(item, new_json_object, predecessor_data):
     return new_json_object
 
 
+# Recursive function to handle nested subInputFields
+def process_item(item, predecessor_data):
+    result = {}
+
+    # If the item has subInputFields, process them recursively
+    if item['fieldDatatype'] == 'Object' and 'subInputFields' in item and item['subInputFields']:
+        # Create a nested object for this field
+        sub_object = {}
+        for sub_item in item['subInputFields']:
+            sub_object[sub_item['fieldName']] = process_item(sub_item, predecessor_data)
+        result = sub_object
+    else:
+        # If the field is a timestamp, use the current timestamp
+        if item['fieldDatatype'] == 'Timestamp':
+            result = int(time.time())
+        else:
+            # Replace placeholders with actual values
+            if '{' in item['fieldValue'] and '}' in item['fieldValue']:
+                result = replaceCurlys(item, result, predecessor_data)
+            else:
+                # Use the fieldName as the key and fieldValue as the value in the new JSON object
+                tempFieldValue = findMappedItems(item['fieldValue'], predecessor_data)
+                if tempFieldValue is not None:
+                    if isinstance(tempFieldValue, list) and len(tempFieldValue) == 1:
+                        tempFieldValue = tempFieldValue[0]  # Return the first entry
+                    elif isinstance(tempFieldValue, str) and tempFieldValue.isnumeric() and item['fieldDatatype'] == 'Number':
+                        tempFieldValue = int(tempFieldValue)
+                result = tempFieldValue
+
+    return result
+
 class MappingNode(ManipulationNode):
     name = "Mapping"
     num_in = 1
@@ -99,30 +130,11 @@ class MappingNode(ManipulationNode):
 
             # Iterate over each object in the JSON array
             for item in json_array:
-
-
-                # If the field is a timestamp use the current timestamp
-                if item['fieldDatatype'] == 'Timestamp':
-                    new_json_object[item['fieldName']] = time.time()
-                else:
-
-                    # Replace placeholders with actual values
-                    # For example if a jmespath query has a {NodeId} then we replace that
-                    # with the value of that model variable. Note: it must be declared before its used
-                    if '{' in item['fieldValue'] and '}' in item['fieldValue']:
-
-                        # Replace placeholders with corresponding values from new_json_object
-                        new_json_object = replaceCurlys(item, new_json_object, predecessor_data)
-
-                    else:
-                        # Use the fieldName as the key and fieldValue as the value in the new JSON object
-                        new_json_object[item['fieldName']] = findMappedItems(item['fieldValue'], predecessor_data) 
-
-
+                new_json_object[item['fieldName']] = process_item(item, predecessor_data)
 
             # Convert the new JSON object to a JSON string (if needed)
             new_json_object_str = json.dumps(new_json_object)
-
+            
             # Return the result
             return new_json_object_str
 

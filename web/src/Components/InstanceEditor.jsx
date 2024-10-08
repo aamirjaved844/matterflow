@@ -1,28 +1,21 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Divider, TextInput, Select, SelectItem } from "@tremor/react";
-import { useState, useEffect } from "react";
-import JsonTree from "./JsonTree";
+import { Button } from "antd";
+import * as API from "../API";
 import ModelSelect from "./ModelSelect";
 import JMESPathTester from "./JMESPathTester";
-import { Button } from "antd";
-
-import * as API from "../API";
 
 const InstanceEditor = (params) => {
   const [dirty, setDirty] = useState(false);
-
   const [inputFields, setInputFields] = useState([]);
-
   const instance_id = params?.instance_id;
 
-  let hasInstanceId = false;
+  const hasInstanceId = instance_id !== undefined;
 
-  if (instance_id != undefined) {
-    //only fetch data if we have a instance id
+  if (hasInstanceId) {
     const init = () => {
       API.getInstance(instance_id).then((res) => {
-        console.log(res.data.json_data);
-        var json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
+        let json_data = JSON.parse(res.data.json_data.replace(/'/g, '"'));
         if (json_data.length === 0 || Object.keys(json_data).length === 0) {
           json_data = [];
         }
@@ -32,62 +25,24 @@ const InstanceEditor = (params) => {
     useEffect(() => {
       init();
     }, []);
-    hasInstanceId = true;
   }
 
-  const handleChangeInput = (index, event) => {
-    const values = [...inputFields];
-    values[index][event.target.name] = event.target.value;
-    setInputFields(values);
-  };
+  const transformJson = (json) => {
+    return json.map((element) => {
+      const newElement = {
+        fieldName: element.fieldName,
+        fieldDatatype: element.fieldDatatype,
+        fieldNameError: element.fieldNameError || "",
+      };
 
-  const handleClose = (handleCloseHandler) => {
-    //close the modal now
-    handleCloseHandler();
-  };
+      if (element.subInputFields) {
+        newElement.subInputFields = transformJson(element.subInputFields);
+      } else {
+        newElement.subInputFields = null;
+      }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log(inputFields);
-
-    // create a new `Date` object
-    const now = new Date();
-    // get the current date and time as a string
-    const currentDateTime = now.toLocaleString();
-
-    const inputs = {
-      name: "instance - " + currentDateTime,
-      description: "instance descriptipn",
-      json_data: JSON.stringify(inputFields),
-    };
-
-    if (hasInstanceId) {
-      //we have an id here
-      const response = await API.updateInstance(instance_id, inputs);
-      console.log(response);
-    } else {
-      // Logic to send the form data to the server
-      const response = await API.addInstance(inputs);
-      console.log(response);
-    }
-    //navigate("/instances");
-  };
-
-  const handleDrop = (index, event) => {
-    event.preventDefault(); //stop the drop event being doubled called
-    setDirty(true);
-    console.log(event.target.name);
-    const dropValue = event.dataTransfer
-      .getData("text")
-      .replace(/(<([^>]+)>)/gi, "");
-
-    const values = [...inputFields];
-    values[index][event.target.name] = dropValue;
-    setInputFields(values);
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
+      return newElement;
+    });
   };
 
   const handleValueChange = (value) => {
@@ -97,34 +52,155 @@ const InstanceEditor = (params) => {
       return;
     }
 
-    // Replace single quotes with double quotes and parse JSON
-    let jsonDataArray;
+    let json = null;
     try {
-      jsonDataArray = JSON.parse(value.replace(/'/g, '"'));
+      json = JSON.parse(value);
     } catch (error) {
       console.error("Invalid JSON format:", error);
       return;
     }
 
-    // Transform the array
-    const newModelArray = jsonDataArray.map((element) => ({
-      fieldName: element.fieldName,
-      fieldDatatype: element.fieldDatatype,
-      fieldValue: "",
-    }));
+    const newModelArray = transformJson(json);
 
     setInputFields(newModelArray);
+  };
+
+  const handleChangeInput = (indices, event) => {
+    const newInputFields = JSON.parse(JSON.stringify(inputFields));
+    const field = getFieldDeep(newInputFields, indices);
+    const value = event.target.value;
+
+    field[event.target.name] = value;
+
+    // Check if the field is of type Object
+    if (field.fieldDatatype === "Object") {
+      // Hide subfields if value is not empty
+      if (value) {
+        field.subInputFieldsHidden = true;
+      } else {
+        // Show subfields if the value is cleared
+        field.subInputFieldsHidden = false;
+      }
+    }
+
+    setInputFields(newInputFields);
+  };
+
+  const handleDrop = (indices, event) => {
+    event.preventDefault();
+    setDirty(true);
+    const dropValue = event.dataTransfer
+      .getData("text")
+      .replace(/(<([^>]+)>)/gi, "");
+
+    const newInputFields = JSON.parse(JSON.stringify(inputFields));
+    const field = getFieldDeep(newInputFields, indices);
+
+    field[event.target.name] = dropValue;
+
+    // Check if the field is of type Object
+    if (field.fieldDatatype === "Object") {
+      // Hide subfields if value is not empty
+      if (dropValue) {
+        field.subInputFieldsHidden = true;
+      } else {
+        // Show subfields if the value is cleared
+        field.subInputFieldsHidden = false;
+      }
+    }
+
+    setInputFields(newInputFields);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const getFieldDeep = (fields, indices) => {
+    if (indices.length === 1) {
+      return fields[indices[0]];
+    } else {
+      const field = fields[indices[0]];
+      if (field.subInputFields && Array.isArray(field.subInputFields)) {
+        return getFieldDeep(field.subInputFields, indices.slice(1));
+      } else {
+        console.warn("subInputFields is either undefined or not an array");
+        return null;
+      }
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const now = new Date();
+    const currentDateTime = now.toLocaleString();
+    const inputs = {
+      name: "instance - " + currentDateTime,
+      description: "instance description",
+      json_data: JSON.stringify(inputFields),
+    };
+
+    if (hasInstanceId) {
+      const response = await API.updateInstance(instance_id, inputs);
+      console.log(response);
+    } else {
+      const response = await API.addInstance(inputs);
+      console.log(response);
+    }
+  };
+
+  const handleClose = (handleCloseHandler) => {
+    handleCloseHandler();
+  };
+
+  const renderFields = (indices, inputField, level) => {
+    const indentStyle = { marginLeft: `${level * 20}px` };
+
+    return (
+      <div key={indices.join("-")} style={indentStyle} className="space-y-2">
+        <div className="flex items-center space-x-2">
+          <TextInput
+            name="fieldName"
+            placeholder="Field Name"
+            disabled={true}
+            value={inputField.fieldName}
+            className="form-input px-4 py-2 rounded border"
+          />
+          <TextInput
+            name="fieldDatatype"
+            placeholder="Field Data Type"
+            disabled={true}
+            value={inputField.fieldDatatype}
+            className="form-input px-4 py-2 rounded border"
+          />
+          <TextInput
+            name="fieldValue"
+            placeholder="Field Value"
+            value={inputField.fieldValue || ""}
+            onDrop={(event) => handleDrop(indices, event)}
+            onDragOver={handleDragOver}
+            onChange={(event) => handleChangeInput(indices, event)}
+            className="form-input px-4 py-2 rounded border"
+          />
+        </div>
+
+        {inputField.subInputFields &&
+          !inputField.subInputFieldsHidden && // Conditionally render subfields based on hidden flag
+          inputField.subInputFields.map((subField, subIndex) =>
+            renderFields([...indices, subIndex], subField, level + 1)
+          )}
+      </div>
+    );
   };
 
   return (
     <div className="ModelEditor">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <h1>Map the json fields to data model</h1>
+          <h1>Map the JSON fields to data model</h1>
           <div className="container mx-auto p-4">
             <ModelSelect onValueChange={handleValueChange} />
           </div>
-
           <div className="container mx-auto p-4">
             <form
               onSubmit={(event) => {
@@ -133,37 +209,11 @@ const InstanceEditor = (params) => {
               }}
               className="space-y-4"
             >
-              {inputFields.map((inputField, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <TextInput
-                    name="fieldName"
-                    placeholder="Field Name"
-                    disabled={true}
-                    value={inputField.fieldName}
-                    className="form-input px-4 py-2 rounded border"
-                  />
-
-                  <TextInput
-                    name="fieldDatatype"
-                    placeholder="Field Data Type"
-                    disabled={true}
-                    value={inputField.fieldDatatype}
-                    className="form-input px-4 py-2 rounded border"
-                  />
-
-                  <TextInput
-                    name="fieldValue"
-                    placeholder="Field Value"
-                    value={inputField.fieldValue}
-                    onDrop={(event) => handleDrop(index, event)}
-                    onDragOver={handleDragOver}
-                    onChange={(event) => handleChangeInput(index, event)}
-                    className="form-input px-4 py-2 rounded border"
-                  />
-                </div>
-              ))}
+              {inputFields.map((inputField, index) =>
+                renderFields([index], inputField, 0)
+              )}
               <Button htmlType="submit" type="primary">
-                Send
+                Submit
               </Button>
             </form>
           </div>

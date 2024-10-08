@@ -68,6 +68,8 @@ def manipulation_node(node_key, node_info):
         return MappingNode(node_info)
     elif node_key == 'CombineNode':
         return CombineNode(node_info)
+    elif node_key == 'SizeBufferNode':
+        return SizeBufferNode(node_info)
     else:
         return None
 
@@ -81,6 +83,8 @@ def visualization_node(node_key, node_info):
 def cloud_node(node_key, node_info):
     if node_key == 'WriteJsonToS3Node':
         return WriteJsonToS3Node(node_info)
+    if node_key == 'BatchPutToSitewiseNode':
+        return BatchPutToSitewiseNode(node_info)
     else:
         return None
 
