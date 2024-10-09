@@ -3,9 +3,10 @@ import React from "react";
 import { Button, Spinner } from "react-bootstrap";
 import { VegaLite } from "react-vega";
 //import { VariableSizeGrid as Grid } from 'react-window';
-import { Drawer } from "antd";
+import { Drawer, Tabs } from "antd";
 import * as API from "../../API";
 import "../../styles/GraphView.css";
+import ReactJson from "react-json-view";
 
 export default class GraphView extends React.Component {
   constructor(props) {
@@ -172,7 +173,27 @@ export default class GraphView extends React.Component {
 
         body = (
           <>
-            <p>{JSON.stringify(this.state.data)}</p>
+            <Tabs
+              items={[
+                {
+                  label: "Raw Data",
+                  key: "RawData",
+                  children: <p>{JSON.stringify(this.state.data)}</p>,
+                },
+                {
+                  label: "JSON Viewer",
+                  key: "JSON Viewer",
+                  children: (
+                    <ReactJson
+                      collapsed
+                      src={this.state.data}
+                      style={{ marginBottom: 10 }}
+                    />
+                  ),
+                },
+              ]}
+              size="small"
+            ></Tabs>
             <Button variant="secondary" onClick={this.onClose}>
               Cancel
             </Button>{" "}
