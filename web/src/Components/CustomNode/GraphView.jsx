@@ -1,9 +1,9 @@
 import propTypes from "prop-types";
-import React from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import { Button, Spinner } from "react-bootstrap";
 import { VegaLite } from "react-vega";
 //import { VariableSizeGrid as Grid } from 'react-window';
-import { Drawer, Tabs } from "antd";
+import { Drawer, Tabs, Table } from "antd";
 import * as API from "../../API";
 import "../../styles/GraphView.css";
 import JsonView from "react18-json-view";
@@ -19,58 +19,13 @@ export default class GraphView extends React.Component {
       rows: [],
       columns: [],
       maxWidth: 0,
-      gridRef: React.createRef(),
     };
   }
-
-  columnWidths = (index) => {
-    return 12 * this.state.widths[index];
-  };
-
-  rowHeights = () =>
-    new Array(765).fill(true).map(() => 25 + Math.round(Math.random() * 50));
 
   onClose = () => {
     this.props.toggleShow();
   };
 
-  /**
-   * Compute width of grid columns.
-   *
-   * Width is based on the maximum-length cell contained within the JSON data.
-   *
-   * @param {Object} columns The column information from the data
-   * @param {int} rowCount Number of rows in the data
-   * @param {Object} data The raw data from Node execution
-   * @returns {any[]}
-   */
-  computeWidths = (columns, rowCount, data) => {
-    const columnCount = columns.length;
-    const widths = new Array(columnCount);
-    let maxWidth = this.state.maxWidth;
-
-    for (let index = 0; index < columnCount; index++) {
-      const column = columns[index];
-      widths[index] = column.length;
-
-      for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-        const row = data[column][rowIndex.toString()];
-
-        if (row != null) {
-          const rowContents = row.toString();
-
-          if (rowContents.length > widths[index]) {
-            widths[index] = rowContents.length;
-          }
-        }
-
-        maxWidth += widths[index] * 12;
-      }
-    }
-
-    this.setState({ maxWidth: maxWidth });
-    return widths;
-  };
 
   load = async () => {
     this.setState({ loading: true });
@@ -79,14 +34,12 @@ export default class GraphView extends React.Component {
       .then((json) => {
         const columns = Object.keys(json);
         const rows = Object.keys(json[columns[0]]);
-        const widths = this.computeWidths(columns, rows.length, json);
 
         this.setState({
           data: json,
           columns: columns,
           rows: rows,
           loading: false,
-          widths: widths,
         });
       })
       .catch((err) => console.error(err));
@@ -104,18 +57,70 @@ export default class GraphView extends React.Component {
       .catch((err) => console.log(err));
   };
 
-  Cell = ({ columnIndex, rowIndex, style }) => {
-    const className = rowIndex % 2 === 0 ? "GridItemEven" : "GridItemOdd";
-    const column = this.state.columns[columnIndex];
+  transformJsonToTableData = (jsonData) => {
+    // Utility function to validate and convert jsonData
+    // Helper functions for validation
+    function isObjectArrayLike(obj) {
+      const keys = Object.keys(obj);
+      return keys.every((key, index) => Number(key) === index);
+    }
 
-    return (
-      <div className={className} style={style}>
-        {rowIndex === 0
-          ? column
-          : this.state.data[column][(rowIndex - 1).toString()]}
-      </div>
-    );
+    function hasNestedStructure(value) {
+      if (typeof value === 'object' && value !== null) {
+        return Object.values(value).some(v => typeof v === 'object' && v !== null);
+      }
+      return false;
+    }
+
+    // Main validation logic (canGenerateTable equivalent)
+    if (Array.isArray(jsonData)) {
+      const isValid = jsonData.every((row) => {
+        return typeof row === 'object' && !Array.isArray(row) && !hasNestedStructure(row);
+      });
+      if (!isValid) return null;
+    } else if (typeof jsonData === 'object' && jsonData !== null) {
+      const keys = Object.keys(jsonData);
+      const isArrayOfArrays = keys.every((key) => {
+        const value = jsonData[key];
+        return Array.isArray(value) || (typeof value === 'object' && isObjectArrayLike(value));
+      });
+
+      if (!isArrayOfArrays) return null;
+
+      const firstArrayLength = Array.isArray(jsonData[keys[0]]) ? jsonData[keys[0]].length : Object.keys(jsonData[keys[0]]).length;
+      const areEqualLength = keys.every((key) => {
+        const length = Array.isArray(jsonData[key]) ? jsonData[key].length : Object.keys(jsonData[key]).length;
+        return length === firstArrayLength;
+      });
+
+      if (!areEqualLength) return null;
+    } else {
+      return null;
+    }
+
+    // Transform the JSON data into a row-oriented format for Antd table
+    const keys = Object.keys(jsonData);
+    const numRows = Object.keys(jsonData[keys[0]]).length;
+    const rows = [];
+    for (let i = 0; i < numRows; i++) {
+      const row = { key: i.toString() };
+      keys.forEach((key) => {
+        row[key] = jsonData[key][i];
+      });
+      rows.push(row);
+    }
+
+    // Dynamically create the columns based on the keys
+    const columns = keys.map((key) => ({
+      title: key,
+      dataIndex: key,
+      key,
+    }));
+
+    // Return transformed data for Antd table
+    return { dataSource: rows, columns };
   };
+
 
   render() {
     let body;
@@ -169,30 +174,42 @@ export default class GraphView extends React.Component {
         body = <VegaLite spec={this.state.data} />;
       } else {
         // Display the grid
-        //let displayHeight = this.state.rows.length * 20;
-        //let displayWidth = this.state.maxWidth;
+
+        const tabsArray = [
+          {
+            label: "Raw Data",
+            key: "RawData",
+            children: <p>{JSON.stringify(this.state.data)}</p>,
+          },
+          {
+            label: "JSON Viewer",
+            key: "JSON Viewer",
+            children: (
+              <JsonView
+                collapsed
+                src={this.state.data}
+                style={{ marginBottom: 10 }}
+              />
+            ),
+          },
+        ];
+
+        const transformedData = this.transformJsonToTableData(this.state.data);
+        if (transformedData) {
+          tabsArray.push({
+            label: "Table Viewer",
+            key: "Table Viewer",
+            children: (
+              <Table dataSource={transformedData.dataSource} columns={transformedData.columns} />
+            ),
+          });
+        }
+
 
         body = (
           <>
             <Tabs
-              items={[
-                {
-                  label: "Raw Data",
-                  key: "RawData",
-                  children: <p>{JSON.stringify(this.state.data)}</p>,
-                },
-                {
-                  label: "JSON Viewer",
-                  key: "JSON Viewer",
-                  children: (
-                    <JsonView
-                      collapsed
-                      src={this.state.data}
-                      style={{ marginBottom: 10 }}
-                    />
-                  ),
-                },
-              ]}
+              items={tabsArray}
               size="small"
             ></Tabs>
             <Button variant="secondary" onClick={this.onClose}>
@@ -238,3 +255,4 @@ GraphView.propTypes = {
   toggleShow: propTypes.func,
   onClose: propTypes.func,
 };
+

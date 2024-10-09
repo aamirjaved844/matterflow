@@ -31,8 +31,11 @@
     "react-hook-form": "^7.52.1",
     "react-router-dom": "^6.24.1",
     "react-vega": "^7.6.0",
+    "react-window": "^1.8.10",
     "react18-json-view": "^0.2.8",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.21.0"
   },
   "devDependencies": {
     "@storybook/react-vite": "^8.3.2",
