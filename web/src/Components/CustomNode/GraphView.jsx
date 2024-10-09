@@ -6,7 +6,8 @@ import { VegaLite } from "react-vega";
 import { Drawer, Tabs } from "antd";
 import * as API from "../../API";
 import "../../styles/GraphView.css";
-import ReactJson from "react-json-view";
+import JsonView from "react18-json-view";
+import "react18-json-view/src/style.css";
 
 export default class GraphView extends React.Component {
   constructor(props) {
@@ -184,7 +185,7 @@ export default class GraphView extends React.Component {
                   label: "JSON Viewer",
                   key: "JSON Viewer",
                   children: (
-                    <ReactJson
+                    <JsonView
                       collapsed
                       src={this.state.data}
                       style={{ marginBottom: 10 }}
