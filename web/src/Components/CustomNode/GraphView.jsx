@@ -170,7 +170,6 @@ export default class GraphView extends React.Component {
         // Display the grid
         //let displayHeight = this.state.rows.length * 20;
         //let displayWidth = this.state.maxWidth;
-
         body = (
           <>
             <Tabs
