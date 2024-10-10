@@ -1,15 +1,19 @@
-import React from 'react'
-import FlowList from './FlowList'
+import React from "react";
+import FlowList from "./FlowList";
+import { Card, Typography } from "antd";
 
 const FlowMenu = (props) => {
   return (
-    <div className="FlowMenu" style={{ paddingTop: '20px' }}>
-        <h3>Flow Menu</h3>
-        <div>Control your flows.</div>
-        <hr />
-        <FlowList {...props} />    
-    </div>
-  )
-}
+    <Card style={{ marginTop: 24 }}>
+      <div style={{ margin: -16 }}>
+        <Typography.Title level={3}>Flow Menu</Typography.Title>
+        <Typography.Text type="secondary">Control your flows.</Typography.Text>
+        <div style={{ paddingTop: "20px" }}>
+          <FlowList {...props} />
+        </div>
+      </div>
+    </Card>
+  );
+};
 
-export default FlowMenu
+export default FlowMenu;

@@ -1,23 +1,27 @@
-import React from 'react'
-import { Tabs, Tab } from "react-bootstrap";
-import ModelList from './ModelList';
-import InstanceList from './InstanceList';
+import { Tabs as AntdTabs } from "antd";
+import React from "react";
+import InstanceList from "./InstanceList";
+import ModelList from "./ModelList";
 
 const ModelsInstancesList = () => {
-    return (
-        <div>
-          <Tabs defaultActiveKey="models" id="model-instance-tabs" className="mb-3">
-            <Tab eventKey="models" title="Models">
-                <ModelList />
-            </Tab>
-    
-            <Tab eventKey="instances" title="Instances">
-                <InstanceList />
-            </Tab>
-          </Tabs>
-        </div>
-      );
-    
-}
+  return (
+    <div>
+      <AntdTabs
+        items={[
+          {
+            label: "Models",
+            key: "models",
+            children: <ModelList />,
+          },
+          {
+            label: "Instances",
+            key: "instances",
+            children: <InstanceList />,
+          },
+        ]}
+      />
+    </div>
+  );
+};
 
-export default ModelsInstancesList
+export default ModelsInstancesList;

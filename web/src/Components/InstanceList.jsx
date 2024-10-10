@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { ListGroup, Button, InputGroup, FormControl, Tabs, Tab } from "react-bootstrap";
+import {
+  ListGroup,
+  Button,
+  InputGroup,
+  FormControl,
+  Tabs,
+  Tab,
+} from "react-bootstrap";
 import InstanceModal from "./InstanceModal"; // Import the instance modal component
-import * as API from '../API';
+import * as API from "../API";
 
 const useFetch = () => {
   const [instances, setInstances] = useState(null);
@@ -11,8 +18,8 @@ const useFetch = () => {
   const fetchData = async () => {
     try {
       const response1 = await API.getInstances();
-      console.log("response1")
-      console.log(response1)
+      console.log("response1");
+      console.log(response1);
       setInstances(response1.data);
     } catch (error) {
       setError(error);
@@ -24,15 +31,14 @@ const useFetch = () => {
   const refetch = async () => {
     setLoading(true);
     await fetchData();
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
   return { instances, loading, error, refetch };
-}
-
+};
 
 const InstanceList = () => {
   const { instances, loading, error, refetch } = useFetch();
@@ -80,12 +86,11 @@ const InstanceList = () => {
       id: id,
       description: renameValue,
     };
-    API.updateInstance(id, inputInstanceData)
-        .then(() => {
-            console.log("Instance saved successfully");
-            refetch();
-        });
-    
+    API.updateInstance(id, inputInstanceData).then(() => {
+      console.log("Instance saved successfully");
+      refetch();
+    });
+
     setRenamingId(null);
   };
 
@@ -102,24 +107,31 @@ const InstanceList = () => {
   const handleAddItem = () => {
     const newId = getNextItemId();
     const newUniqueId = `unique${newId}`; // Simple unique ID
-    const newItem = { id: newId, description: newUniqueId, name: `newInstance${newId}.json`, json_data: {} };
+    const newItem = {
+      id: newId,
+      description: newUniqueId,
+      name: `newInstance${newId}.json`,
+      json_data: {},
+    };
 
     // Logic to send the form data to the server
-    API.addInstance(newItem).then(() => {
-      console.log("Instance added successfully");
-      refetch();
-    })
-    .catch(err => console.log(err));
+    API.addInstance(newItem)
+      .then(() => {
+        console.log("Instance added successfully");
+        refetch();
+      })
+      .catch((err) => console.log(err));
     setBoldItemId(newId); // Highlight the newly added item in bold
   };
 
   // Handler to delete an item (instance or instance)
   const handleDelete = (id) => {
-    API.deleteInstance(id).then(() => {
-      console.log("Instance deleted successfully");
-      refetch();
-    })
-    .catch(err => console.log(err));
+    API.deleteInstance(id)
+      .then(() => {
+        console.log("Instance deleted successfully");
+        refetch();
+      })
+      .catch((err) => console.log(err));
   };
 
   if (Object.keys(instances).length === 0) {
@@ -128,66 +140,79 @@ const InstanceList = () => {
         <div>You have no saved instances.</div>
         {/* Button to add new instance */}
         <div className="mt-3 text-center">
-          <Button variant="primary" onClick={() => handleAddItem()}>
+          <Button variant="outline-success" onClick={() => handleAddItem()}>
             Add New Instance
           </Button>
         </div>
-      </>        
+      </>
     );
   }
 
   // Rendering a list of items (instances)
   const renderList = (items) => (
-    <div style={{ maxHeight: "300px", overflowY: items.length > 5 ? "scroll" : "auto" }}>
+    <div
+      style={{
+        maxHeight: "300px",
+        overflowY: items.length > 5 ? "scroll" : "auto",
+      }}
+    >
       <ListGroup>
         {items.map((item) => (
           <ListGroup.Item
             key={item.id} // Using uniqueId for key
             className="d-flex justify-content-between align-items-center"
           >
-            {/* Item name or Rename Input */}
-            {renamingId === item.id ? (
-              <InputGroup size="sm" style={{ maxWidth: "200px" }}>
-                <FormControl
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                />
-                <Button
-                  variant="outline-success"
-                  onClick={() => handleRenameConfirm(item.id)}
+            <div style={{ flexDirection: "column" }}>
+              {/* Item name or Rename Input */}
+              {renamingId === item.id ? (
+                <InputGroup size="sm" style={{ maxWidth: "200px" }}>
+                  <FormControl
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                  />
+                  <Button
+                    variant="outline-success"
+                    onClick={() => handleRenameConfirm(item.id)}
+                  >
+                    Save
+                  </Button>
+                </InputGroup>
+              ) : (
+                <span
+                  onClick={() => handleItemClick(item)}
+                  style={{
+                    cursor: "pointer",
+                    fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
+                  }}
                 >
-                  Save
-                </Button>
-              </InputGroup>
-            ) : (
-              <span
-                onClick={() => handleItemClick(item)}
+                  {item.description}
+                </span>
+              )}
+
+              {/* Action buttons: Rename and Delete */}
+              <div
                 style={{
-                  cursor: "pointer",
-                  fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 8,
                 }}
               >
-                {item.description}
-              </span>
-            )}
-
-            {/* Action buttons: Rename and Delete */}
-            <div>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                className="me-2"
-                onClick={() => handleRename(item.id, item.description)}
-              >
-                Rename
-              </Button>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => handleDelete(item.id)}
-              >
-                Delete
-              </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleRename(item.id, item.description)}
+                >
+                  Rename
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </ListGroup.Item>
         ))}
@@ -197,23 +222,27 @@ const InstanceList = () => {
 
   return (
     <div>
-          {renderList(instances)}
+      {renderList(instances)}
 
-          {/* Button to add new instance */}
-          <div className="mt-3 text-center">
-            <Button variant="primary" onClick={() => handleAddItem()}>
-              Add New Instance
-            </Button>
-          </div>
+      {/* Button to add new instance */}
+      <div className="mt-3 text-center">
+        <Button variant="outline-success" onClick={() => handleAddItem()}>
+          Add New Instance
+        </Button>
+      </div>
       {/* Full-screen modal for instances */}
       {selectedItem && (
         <>
-        <InstanceModal show={showModal} handleClose={handleCloseModal} instanceName={selectedItem.name} instanceId={selectedItem.id}/>
+          <InstanceModal
+            show={showModal}
+            handleClose={handleCloseModal}
+            instanceName={selectedItem.name}
+            instanceId={selectedItem.id}
+          />
         </>
       )}
     </div>
   );
-
 };
 
 export default InstanceList;

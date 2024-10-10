@@ -7,7 +7,7 @@ import DialogConfirmation from "./DialogConfirmation";
 import { ListGroup, Button, InputGroup, FormControl } from "react-bootstrap";
 import StatusLight from "./StatusLight";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Modal as AntdModal, Modal, Spin } from "antd";
+import { Modal as AntdModal, Spin } from "antd";
 const { confirm } = AntdModal;
 
 const PROCESS_POLL_TIME = 10000; // 10 seconds
@@ -249,35 +249,43 @@ const FlowList = (props) => {
               key={"new"} // Using uniqueId for key
               className="d-flex justify-content-between align-items-center"
             >
-              <span
-                style={{
-                  cursor: "pointer",
-                  fontWeight: "bold", // Make flow name bold if clicked
-                }}
-              >
-                *unsaved_flow
-              </span>
-              {/* Action buttons: Rename and Delete */}
-              <div>
-                <Button variant="link" size="sm" className="me-2">
-                  <StatusLight />
-                </Button>
-                <OverlayTrigger
-                  placement="right"
-                  delay={{ show: 250, hide: 400 }}
-                  overlay={renderTooltip}
+              <div style={{ flexDirection: "column" }}>
+                <span
+                  style={{
+                    cursor: "pointer",
+                    fontWeight: "bold", // Make flow name bold if clicked
+                  }}
                 >
-                  <Button variant="outline-dark" size="sm" className="me-2">
-                    Rename
+                  *unsaved_flow
+                </span>
+                {/* Action buttons: Rename and Delete */}
+                <div
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 8,
+                  }}
+                >
+                  <Button variant="link" size="sm" className="me-2">
+                    <StatusLight />
                   </Button>
-                </OverlayTrigger>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => (window.location = `/`)}
-                >
-                  Delete
-                </Button>
+                  <OverlayTrigger
+                    placement="right"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={renderTooltip}
+                  >
+                    <Button variant="outline-dark" size="sm" className="me-2">
+                      Rename
+                    </Button>
+                  </OverlayTrigger>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => (window.location = `/`)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             </ListGroup.Item>
           )}
@@ -287,59 +295,68 @@ const FlowList = (props) => {
               key={flow.name} // Using uniqueId for key
               className="d-flex justify-content-between align-items-center"
             >
-              {/* Flow name or Rename Input */}
-              {renamingId === flow.id ? (
-                <InputGroup size="sm" style={{ maxWidth: "200px" }}>
-                  <FormControl
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                  />
-                  <Button
-                    variant="outline-success"
-                    onClick={() => handleRenameConfirm(flow.id)}
+              <div style={{ flexDirection: "column" }}>
+                {/* Flow name or Rename Input */}
+                {renamingId === flow.id ? (
+                  <InputGroup size="sm" style={{ maxWidth: "200px" }}>
+                    <FormControl
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                    />
+                    <Button
+                      variant="outline-success"
+                      onClick={() => handleRenameConfirm(flow.id)}
+                    >
+                      Save
+                    </Button>
+                  </InputGroup>
+                ) : (
+                  <span
+                    onClick={() => handleFlowClick(flow)}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight:
+                        selected_flow_id == flow.id ? "bold" : "normal", // Make flow name bold if clicked
+                    }}
                   >
-                    Save
-                  </Button>
-                </InputGroup>
-              ) : (
-                <span
-                  onClick={() => handleFlowClick(flow)}
+                    {selected_flow_id == flow.id && props.isDirty ? "*" : ""}
+                    {flow.description}
+                  </span>
+                )}
+
+                {/* Action buttons: Rename and Delete */}
+                <div
                   style={{
-                    cursor: "pointer",
-                    fontWeight: selected_flow_id == flow.id ? "bold" : "normal", // Make flow name bold if clicked
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginTop: 8,
                   }}
                 >
-                  {selected_flow_id == flow.id && props.isDirty ? "*" : ""}
-                  {flow.description}
-                </span>
-              )}
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => handleChangeState(flow.name)}
+                  >
+                    <StatusLight status={getFlowStatus(flow.name)} />
+                  </Button>
 
-              {/* Action buttons: Rename and Delete */}
-              <div>
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleChangeState(flow.name)}
-                >
-                  <StatusLight status={getFlowStatus(flow.name)} />
-                </Button>
-
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleRename(flow.id, flow.description)}
-                >
-                  Rename
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => handleDelete(flow.id, flow.name)}
-                >
-                  Delete
-                </Button>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => handleRename(flow.id, flow.description)}
+                  >
+                    Rename
+                  </Button>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => handleDelete(flow.id, flow.name)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             </ListGroup.Item>
           ))}
@@ -348,11 +365,11 @@ const FlowList = (props) => {
 
       {/* Button to add new flow and browse processes*/}
       <div className="mt-3 text-center">
-        <Button variant="primary" onClick={handleAddFlow}>
+        <Button variant="outline-success" onClick={handleAddFlow}>
           Add New Flow
         </Button>
         <Button
-          variant="primary"
+          variant="outline-success"
           className="ms-2"
           onClick={() => {
             setShowProcessModal(true);

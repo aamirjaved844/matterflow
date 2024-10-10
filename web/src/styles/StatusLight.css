@@ -2,6 +2,7 @@
     width: 40px;
     height: 15px;
     margin-top: 5px;
+    border-radius: 4px;
     display: flex;
     justify-content: space-around;
     align-items: center;

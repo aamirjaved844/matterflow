@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { ListGroup, Button, InputGroup, FormControl, Tabs, Tab } from "react-bootstrap";
+import {
+  ListGroup,
+  Button,
+  InputGroup,
+  FormControl,
+  Tabs,
+  Tab,
+} from "react-bootstrap";
 import ModelModal from "./ModelModal"; // Import the model modal component
-import * as API from '../API';
+import * as API from "../API";
 
 const useFetch = () => {
   const [models, setModels] = useState(null);
@@ -11,8 +18,8 @@ const useFetch = () => {
   const fetchData = async () => {
     try {
       const response1 = await API.getModels();
-      console.log("response1")
-      console.log(response1)
+      console.log("response1");
+      console.log(response1);
       setModels(response1.data);
     } catch (error) {
       setError(error);
@@ -24,15 +31,14 @@ const useFetch = () => {
   const refetch = async () => {
     setLoading(true);
     await fetchData();
-  }
+  };
 
   useEffect(() => {
     fetchData();
   }, []);
 
   return { models, loading, error, refetch };
-}
-
+};
 
 const ModelList = () => {
   const { models, loading, error, refetch } = useFetch();
@@ -80,12 +86,11 @@ const ModelList = () => {
       id: id,
       description: renameValue,
     };
-    API.updateModel(id, inputModelData)
-        .then(() => {
-            console.log("Model saved successfully");
-            refetch();
-        });
-    
+    API.updateModel(id, inputModelData).then(() => {
+      console.log("Model saved successfully");
+      refetch();
+    });
+
     setRenamingId(null);
   };
 
@@ -102,92 +107,112 @@ const ModelList = () => {
   const handleAddItem = () => {
     const newId = getNextItemId();
     const newUniqueId = `unique${newId}`; // Simple unique ID
-    const newItem = { id: newId, description: newUniqueId, name: `newModel${newId}.json`, json_data: {} };
+    const newItem = {
+      id: newId,
+      description: newUniqueId,
+      name: `newModel${newId}.json`,
+      json_data: {},
+    };
 
     // Logic to send the form data to the server
-    API.addModel(newItem).then(() => {
-      console.log("Model added successfully");
-      refetch();
-    })
-    .catch(err => console.log(err));
+    API.addModel(newItem)
+      .then(() => {
+        console.log("Model added successfully");
+        refetch();
+      })
+      .catch((err) => console.log(err));
     setBoldItemId(newId); // Highlight the newly added item in bold
   };
 
   // Handler to delete an item (model or instance)
   const handleDelete = (id) => {
-    API.deleteModel(id).then(() => {
-      console.log("Model deleted successfully");
-      refetch();
-    })
-    .catch(err => console.log(err));
+    API.deleteModel(id)
+      .then(() => {
+        console.log("Model deleted successfully");
+        refetch();
+      })
+      .catch((err) => console.log(err));
   };
 
   if (Object.keys(models).length === 0) {
     return (
       <>
-      <div>You have no saved models.</div>
-      {/* Button to add new model */}
-      <div className="mt-3 text-center">
-        <Button variant="primary" onClick={() => handleAddItem()}>
-          Add New Model
-        </Button>
-      </div>
+        <div>You have no saved models.</div>
+        {/* Button to add new model */}
+        <div className="mt-3 text-center">
+          <Button variant="outline-success" onClick={() => handleAddItem()}>
+            Add New Model
+          </Button>
+        </div>
       </>
     );
   }
 
   // Rendering a list of items (models)
   const renderList = (items) => (
-    <div style={{ maxHeight: "300px", overflowY: items.length > 5 ? "scroll" : "auto" }}>
+    <div
+      style={{
+        maxHeight: "300px",
+        overflowY: items.length > 5 ? "scroll" : "auto",
+      }}
+    >
       <ListGroup>
         {items.map((item) => (
           <ListGroup.Item
             key={item.id} // Using uniqueId for key
             className="d-flex justify-content-between align-items-center"
           >
-            {/* Item name or Rename Input */}
-            {renamingId === item.id ? (
-              <InputGroup size="sm" style={{ maxWidth: "200px" }}>
-                <FormControl
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                />
-                <Button
-                  variant="outline-success"
-                  onClick={() => handleRenameConfirm(item.id)}
+            <div style={{ flexDirection: "column" }}>
+              {/* Item name or Rename Input */}
+              {renamingId === item.id ? (
+                <InputGroup size="sm" style={{ maxWidth: "200px" }}>
+                  <FormControl
+                    value={renameValue}
+                    onChange={(e) => setRenameValue(e.target.value)}
+                  />
+                  <Button
+                    variant="outline-success"
+                    onClick={() => handleRenameConfirm(item.id)}
+                  >
+                    Save
+                  </Button>
+                </InputGroup>
+              ) : (
+                <span
+                  onClick={() => handleItemClick(item)}
+                  style={{
+                    cursor: "pointer",
+                    fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
+                  }}
                 >
-                  Save
-                </Button>
-              </InputGroup>
-            ) : (
-              <span
-                onClick={() => handleItemClick(item)}
+                  {item.description}
+                </span>
+              )}
+
+              {/* Action buttons: Rename and Delete */}
+              <div
                 style={{
-                  cursor: "pointer",
-                  fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginTop: 8,
                 }}
               >
-                {item.description}
-              </span>
-            )}
-
-            {/* Action buttons: Rename and Delete */}
-            <div>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                className="me-2"
-                onClick={() => handleRename(item.id, item.description)}
-              >
-                Rename
-              </Button>
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => handleDelete(item.id)}
-              >
-                Delete
-              </Button>
+                <Button
+                  variant="outline-primary"
+                  size="sm"
+                  className="me-2"
+                  onClick={() => handleRename(item.id, item.description)}
+                >
+                  Rename
+                </Button>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => handleDelete(item.id)}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
           </ListGroup.Item>
         ))}
@@ -197,23 +222,27 @@ const ModelList = () => {
 
   return (
     <div>
-          {renderList(models, "model")}
+      {renderList(models, "model")}
 
-          {/* Button to add new model */}
-          <div className="mt-3 text-center">
-            <Button variant="primary" onClick={() => handleAddItem()}>
-              Add New Model
-            </Button>
-          </div>
+      {/* Button to add new model */}
+      <div className="mt-3 text-center">
+        <Button variant="outline-success" onClick={() => handleAddItem()}>
+          Add New Model
+        </Button>
+      </div>
       {/* Full-screen modal for models */}
       {selectedItem && (
         <>
-        <ModelModal show={showModal} handleClose={handleCloseModal} modelName={selectedItem.name} modelId={selectedItem.id}/>
+          <ModelModal
+            show={showModal}
+            handleClose={handleCloseModal}
+            modelName={selectedItem.name}
+            modelId={selectedItem.id}
+          />
         </>
       )}
     </div>
   );
-
 };
 
 export default ModelList;
