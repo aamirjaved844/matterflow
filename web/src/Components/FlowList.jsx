@@ -7,7 +7,13 @@ import DialogConfirmation from "./DialogConfirmation";
 import { ListGroup, Button, InputGroup, FormControl } from "react-bootstrap";
 import StatusLight from "./StatusLight";
 import { OverlayTrigger, Tooltip } from "react-bootstrap";
-import { Modal as AntdModal, Spin } from "antd";
+import {
+  Modal as AntdModal,
+  Spin,
+  Button as AntdButton,
+  Tooltip as AntdTooltip,
+} from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 const { confirm } = AntdModal;
 
 const PROCESS_POLL_TIME = 10000; // 10 seconds
@@ -249,41 +255,50 @@ const FlowList = (props) => {
               key={"new"} // Using uniqueId for key
               className="d-flex justify-content-between align-items-center"
             >
-              <div style={{ flexDirection: "column" }}>
-                <span
-                  style={{
-                    cursor: "pointer",
-                    fontWeight: "bold", // Make flow name bold if clicked
-                  }}
-                >
-                  *unsaved_flow
-                </span>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
+                  <span
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: "bold", // Make flow name bold if clicked
+                    }}
+                  >
+                    *unsaved_flow
+                  </span>
+                </div>
                 {/* Action buttons: Rename and Delete */}
                 <div
                   style={{
+                    display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    marginTop: 8,
+                    alignItems: "center",
                   }}
                 >
-                  <Button variant="link" size="sm" className="me-2">
-                    <StatusLight />
-                  </Button>
                   <OverlayTrigger
                     placement="right"
                     delay={{ show: 250, hide: 400 }}
                     overlay={renderTooltip}
                   >
-                    <Button variant="outline-dark" size="sm" className="me-2">
-                      Rename
-                    </Button>
+                    <AntdButton type="text" icon={<EditOutlined />} />
                   </OverlayTrigger>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => (window.location = `/`)}
-                  >
-                    Delete
+                  <AntdTooltip title="Delete">
+                    <AntdButton
+                      type="text"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => (window.location = `/`)}
+                    />
+                  </AntdTooltip>
+                  <Button variant="link" size="sm">
+                    <StatusLight />
                   </Button>
                 </div>
               </div>
@@ -295,66 +310,75 @@ const FlowList = (props) => {
               key={flow.name} // Using uniqueId for key
               className="d-flex justify-content-between align-items-center"
             >
-              <div style={{ flexDirection: "column" }}>
-                {/* Flow name or Rename Input */}
-                {renamingId === flow.id ? (
-                  <InputGroup size="sm" style={{ maxWidth: "200px" }}>
-                    <FormControl
-                      value={renameValue}
-                      onChange={(e) => setRenameValue(e.target.value)}
-                    />
-                    <Button
-                      variant="outline-success"
-                      onClick={() => handleRenameConfirm(flow.id)}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
+                  {/* Flow name or Rename Input */}
+                  {renamingId === flow.id ? (
+                    <InputGroup size="sm" style={{ maxWidth: "200px" }}>
+                      <FormControl
+                        value={renameValue}
+                        onChange={(e) => setRenameValue(e.target.value)}
+                      />
+                      <Button
+                        variant="outline-success"
+                        onClick={() => handleRenameConfirm(flow.id)}
+                      >
+                        Save
+                      </Button>
+                    </InputGroup>
+                  ) : (
+                    <span
+                      onClick={() => handleFlowClick(flow)}
+                      style={{
+                        cursor: "pointer",
+                        fontWeight:
+                          selected_flow_id == flow.id ? "bold" : "normal", // Make flow name bold if clicked
+                      }}
                     >
-                      Save
-                    </Button>
-                  </InputGroup>
-                ) : (
-                  <span
-                    onClick={() => handleFlowClick(flow)}
-                    style={{
-                      cursor: "pointer",
-                      fontWeight:
-                        selected_flow_id == flow.id ? "bold" : "normal", // Make flow name bold if clicked
-                    }}
-                  >
-                    {selected_flow_id == flow.id && props.isDirty ? "*" : ""}
-                    {flow.description}
-                  </span>
-                )}
+                      {selected_flow_id == flow.id && props.isDirty ? "*" : ""}
+                      {flow.description}
+                    </span>
+                  )}
+                </div>
 
                 {/* Action buttons: Rename and Delete */}
                 <div
                   style={{
+                    display: "flex",
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    marginTop: 8,
+                    alignItems: "center",
                   }}
                 >
+                  <AntdTooltip title="Rename">
+                    <AntdButton
+                      type="text"
+                      onClick={() => handleRename(flow.id, flow.description)}
+                      icon={<EditOutlined />}
+                    />
+                  </AntdTooltip>
+                  <AntdTooltip title="Delete">
+                    <AntdButton
+                      type="text"
+                      onClick={() => handleDelete(flow.id, flow.name)}
+                      icon={<DeleteOutlined />}
+                      danger
+                    />
+                  </AntdTooltip>
                   <Button
                     variant="link"
                     size="sm"
-                    className="me-2"
+                    // className="me-2"
                     onClick={() => handleChangeState(flow.name)}
                   >
                     <StatusLight status={getFlowStatus(flow.name)} />
-                  </Button>
-
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    className="me-2"
-                    onClick={() => handleRename(flow.id, flow.description)}
-                  >
-                    Rename
-                  </Button>
-                  <Button
-                    variant="outline-danger"
-                    size="sm"
-                    onClick={() => handleDelete(flow.id, flow.name)}
-                  >
-                    Delete
                   </Button>
                 </div>
               </div>

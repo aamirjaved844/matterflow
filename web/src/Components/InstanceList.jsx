@@ -10,6 +10,9 @@ import {
 import InstanceModal from "./InstanceModal"; // Import the instance modal component
 import * as API from "../API";
 
+import { Button as AntdButton, Tooltip } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+
 const useFetch = () => {
   const [instances, setInstances] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -162,56 +165,66 @@ const InstanceList = () => {
             key={item.id} // Using uniqueId for key
             className="d-flex justify-content-between align-items-center"
           >
-            <div style={{ flexDirection: "column" }}>
-              {/* Item name or Rename Input */}
-              {renamingId === item.id ? (
-                <InputGroup size="sm" style={{ maxWidth: "200px" }}>
-                  <FormControl
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                  />
-                  <Button
-                    variant="outline-success"
-                    onClick={() => handleRenameConfirm(item.id)}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              <div style={{ display: "flex", flex: 1, alignItems: "center" }}>
+                {/* Item name or Rename Input */}
+                {renamingId === item.id ? (
+                  <InputGroup size="sm" style={{ maxWidth: "200px" }}>
+                    <FormControl
+                      value={renameValue}
+                      onChange={(e) => setRenameValue(e.target.value)}
+                    />
+                    <Button
+                      variant="outline-success"
+                      onClick={() => handleRenameConfirm(item.id)}
+                    >
+                      Save
+                    </Button>
+                  </InputGroup>
+                ) : (
+                  <span
+                    onClick={() => handleItemClick(item)}
+                    style={{
+                      cursor: "pointer",
+                      fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
+                    }}
                   >
-                    Save
-                  </Button>
-                </InputGroup>
-              ) : (
-                <span
-                  onClick={() => handleItemClick(item)}
-                  style={{
-                    cursor: "pointer",
-                    fontWeight: boldItemId === item.id ? "bold" : "normal", // Make item name bold if clicked
-                  }}
-                >
-                  {item.description}
-                </span>
-              )}
+                    {item.description}
+                  </span>
+                )}
+              </div>
 
               {/* Action buttons: Rename and Delete */}
               <div
                 style={{
+                  display: "flex",
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginTop: 8,
+                  alignItems: "center",
                 }}
               >
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => handleRename(item.id, item.description)}
-                >
-                  Rename
-                </Button>
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => handleDelete(item.id)}
-                >
-                  Delete
-                </Button>
+                <Tooltip title="Rename">
+                  <AntdButton
+                    type="text"
+                    onClick={() => handleRename(item.id, item.description)}
+                    icon={<EditOutlined />}
+                  />
+                </Tooltip>
+                <Tooltip title="Delete">
+                  <AntdButton
+                    type="text"
+                    onClick={() => handleDelete(item.id)}
+                    icon={<DeleteOutlined />}
+                    danger
+                  />
+                </Tooltip>
               </div>
             </div>
           </ListGroup.Item>
