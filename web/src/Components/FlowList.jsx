@@ -267,7 +267,7 @@ const FlowList = (props) => {
                   }}
                 >
                   <Button variant="link" size="sm" className="me-2">
-                    <StatusLight isSwitch />
+                    <StatusLight />
                   </Button>
                   <OverlayTrigger
                     placement="right"
@@ -338,7 +338,7 @@ const FlowList = (props) => {
                     className="me-2"
                     onClick={() => handleChangeState(flow.name)}
                   >
-                    <StatusLight status={getFlowStatus(flow.name)} isSwitch />
+                    <StatusLight status={getFlowStatus(flow.name)} />
                   </Button>
 
                   <Button
